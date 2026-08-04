@@ -13,10 +13,12 @@
     <div class="wrap">
       <a class="brand" href="/"><span class="dot"></span>{{ app_name }}</a>
 
+      {% if current_user %}
       <form class="searchbar" action="/catalog" method="get" data-track="search-form">
         <input type="text" name="q" placeholder="Search courses…" autocomplete="off"
                data-track="search" value="{{ query|default('') }}">
       </form>
+      {% endif %}
 
       <nav class="nav">
         <a href="/catalog">Catalog</a>
