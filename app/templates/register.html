@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Create account — {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="panel narrow stagger-1 p-48 rounded-24 shadow-lg">
+  <div class="text-center mb-32">
+    <div class="dot w-48 h-48 rounded-full bg-brand-soft inline-block shadow-brand mb-16"></div>
+    <span class="eyebrow block">Get started</span>
+    <h1 class="m-0 mt-8 text-28 font-bold">Create your account</h1>
+  </div>
+
+  {% if error %}<div class="alert error">{{ error }}</div>{% endif %}
+
+  <form class="stack" method="post" action="/register">
+    <div>
+      <label for="name">Full Name</label>
+      <input id="name" type="text" name="name" value="{{ name|default('') }}" placeholder="Ada Lovelace (Optional)">
+    </div>
+    <div>
+      <label for="email">Email address</label>
+      <input id="email" type="email" name="email" value="{{ email|default('') }}" required placeholder="ada@example.com">
+    </div>
+    <div>
+      <label for="password">Password</label>
+      <input id="password" type="password" name="password" required minlength="6" placeholder="•••••••• (Min. 6 chars)">
+    </div>
+    <button class="btn w-full justify-center p-14 mt-8" type="submit">Create account</button>
+  </form>
+
+  <div class="text-center mt-32 pt-24 border-t">
+    <p class="muted m-0">
+      Already registered? <a href="/login" class="font-semibold">Sign in</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

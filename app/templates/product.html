@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}{{ product.title }} — {{ app_name }}{% endblock %}
+
+{% set page_context = {
+  'type': 'product',
+  'product_id': product.id,
+  'slug': product.slug,
+  'category': product.category,
+  'level': product.level,
+  'tags': product.tag_list
+} %}
+
+{% block content %}
+<div class="two-col">
+  <div class="stagger-1">
+    <div class="page-head mb-24">
+      <span class="eyebrow">{{ product.category|title }} · {{ product.level|title }}</span>
+      <h1 class="text-38 leading-snug">{{ product.title }}</h1>
+      <p class="mt-12 text-16 text-ink-soft">
+        {% if product.instructor %}<span class="font-medium text-ink">Taught by {{ product.instructor }}</span> <span class="mx-8">·</span> {% endif %}
+        <span class="text-amber">★</span> <span class="font-semibold text-ink">{{ '%.1f'|format(product.rating) }}</span> 
+        <span class="mx-8">·</span> {{ '%.0f'|format(product.duration_hours) }} hours
+      </p>
+    </div>
+
+    <div class="panel p-40 rounded-24 shadow-none border border-line">
+      <h3 class="m-0 mt-0 text-20 font-semibold mb-16">About this course</h3>
+      <p class="m-0 whitespace-pre-line text-16 leading-loose text-ink-soft">{{ product.description }}</p>
+      
+      {% if product.tag_list %}
+        <div class="filters m-0 mt-32">
+          {% for tag in product.tag_list %}<span class="tag muted">{{ tag }}</span>{% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <aside class="stagger-2">
+    <div class="panel sticky-top p-32 rounded-24 shadow-lg">
+      <div class="text-36 font-bold tracking-tighter text-ink">
+        ${{ '%.0f'|format(product.price) }}
+      </div>
+      <p class="muted m-0 mt-8 mb-24 font-medium">One-time purchase · lifetime access</p>
+      <button class="btn w-full justify-center p-16" data-track-click="enroll"
+              data-product-id="{{ product.id }}" data-slug="{{ product.slug }}"
+              data-category="{{ product.category }}" id="enroll-btn">Enroll now</button>
+      <div class="mt-24">
+        <div class="kv"><span>Level</span><span class="tag level text-11">{{ product.level|title }}</span></div>
+        <div class="kv"><span>Duration</span><span>{{ '%.0f'|format(product.duration_hours) }} hours</span></div>
+        <div class="kv"><span>Rating</span><span><span class="text-amber">★</span> {{ '%.1f'|format(product.rating) }}</span></div>
+      </div>
+    </div>
+    {% if not current_user %}
+      <div class="alert info mt-24">
+        <span class="text-20">💡</span>
+        <p class="m-0"><a href="/register" class="font-semibold">Create an account</a> and your browsing starts shaping personalised recommendations.</p>
+      </div>
+    {% endif %}
+  </aside>
+</div>
+
+{% if related %}
+  <div class="page-head stagger-3 mt-80">
+    <span class="eyebrow">Semantically similar</span>
+    <h1 class="text-24">Learners often pair this with</h1>
+  </div>
+  <div class="grid stagger-4">
+    {% for product in related %}{% include "_product_card.html" %}{% endfor %}
+  </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const enrollBtn = document.getElementById('enroll-btn');
+  if (enrollBtn) {
+    enrollBtn.addEventListener('click', function(e) {
+      const btn = this;
+      const originalText = btn.textContent;
+      
+      // Track add to cart event manually if needed (though tracker.js handles data-track-click)
+      if (window.SmartReco) {
+        window.SmartReco.track('add_to_cart', {
+          product_id: btn.getAttribute('data-product-id'),
+          category: btn.getAttribute('data-category')
+        });
+      }
+      
+      btn.innerHTML = 'Added to Cart ✓';
+      btn.style.background = '#10b981';
+      
+      if (window.showToast) {
+        window.showToast('Added to cart successfully!', 'success');
+      }
+      
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.style.background = '';
+      }, 2000);
+    });
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Behaviour-driven learning recommendations.">
+  <title>{% block title %}{{ app_name }}{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='42' fill='%236366f1'/></svg>">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="/"><span class="dot"></span>{{ app_name }}</a>
+
+      <form class="searchbar" action="/catalog" method="get" data-track="search-form">
+        <input type="text" name="q" placeholder="Search courses…" autocomplete="off"
+               data-track="search" value="{{ query|default('') }}">
+      </form>
+
+      <nav class="nav">
+        <a href="/catalog">Catalog</a>
+        {% if current_user %}
+          {% if current_user.is_admin %}
+            <a href="/admin/products">Products</a>
+            <a href="/admin/system">System</a>
+          {% else %}
+            <a href="/dashboard">For you</a>
+          {% endif %}
+          <a href="/logout">Sign out</a>
+        {% else %}
+          <a href="/login">Sign in</a>
+          <a class="pill" href="/register">Create account</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <script id="page-context" type="application/json">
+    {{ page_context|default({})|tojson }}
+  </script>
+  <script>
+    window.SMARTRECO_PAGE = JSON.parse(document.getElementById('page-context').textContent);
+  </script>
+  <script src="/static/js/app.js" defer></script>
+  <script src="/static/js/tracker.js" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

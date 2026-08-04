@@ -1,0 +1,31 @@
+# --- Web framework (required by CI check) ---
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+jinja2>=3.1.3
+python-multipart>=0.0.9
+itsdangerous>=2.1.2
+
+# --- LLM client: every AI call goes through Mesh API (OpenAI-compatible) ---
+openai>=1.30.0
+
+# --- Persistence ---
+SQLAlchemy>=2.0.25
+bcrypt>=4.1.2
+
+# --- Vector database ---
+chromadb>=0.4.24
+
+# --- Agentic workflow (bonus) ---
+langgraph>=0.0.40
+langchain-core>=0.1.40
+
+# --- Scheduling for proactive delivery (bonus) ---
+APScheduler>=3.10.4
+
+# --- Observability (bonus) ---
+langsmith>=0.1.40
+
+# --- Misc ---
+httpx>=0.26.0
+pydantic>=2.6.0
+python-dotenv>=1.0.1

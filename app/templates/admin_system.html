@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}System — Admin{% endblock %}
+
+{% block content %}
+<div class="page-head stagger-1">
+  <span class="eyebrow">Admin</span>
+  <h1>System Dashboard</h1>
+  <p>What is wired up, and what is degraded.</p>
+</div>
+
+{% if flash %}<div class="alert ok stagger-1">{{ flash }}</div>{% endif %}
+
+<div class="stats stagger-2 mb-32">
+  <div class="stat">
+    <div class="l">Users</div>
+    <div class="n mt-8">{{ counts.users }}</div>
+  </div>
+  <div class="stat">
+    <div class="l">Products</div>
+    <div class="n mt-8">{{ counts.products }}</div>
+  </div>
+  <div class="stat">
+    <div class="l">Events Tracked</div>
+    <div class="n mt-8">{{ counts.events }}</div>
+  </div>
+  <div class="stat">
+    <div class="l">Recommendations</div>
+    <div class="n mt-8 text-brand">{{ counts.recommendations }}</div>
+  </div>
+</div>
+
+<div class="two-col stagger-3">
+  <div class="panel">
+    <div class="flex items-center gap-12 mb-24">
+      <div class="w-40 h-40 rounded-12 bg-brand-soft flex items-center justify-center text-20">⚙️</div>
+      <div>
+        <span class="eyebrow m-0">Pipeline</span>
+        <h3 class="m-0 text-18 font-bold">Components</h3>
+      </div>
+    </div>
+    
+    <div class="kv"><span>Vector backend</span><span class="tag muted">{{ vector_backend }}</span></div>
+    <div class="kv"><span>Vector documents</span><span class="tabular-nums">{{ sync.vector_documents }}</span></div>
+    <div class="kv"><span>SQL published products</span><span class="tabular-nums">{{ sync.sql_published }}</span></div>
+    <div class="kv">
+      <span>Stores in sync</span>
+      <span>
+        {% if sync.in_sync %}
+          <span class="text-emerald flex items-center gap-6"><span class="dot-ok"></span> Yes</span>
+        {% else %}
+          <span class="text-red flex items-center gap-6"><span class="dot-bad"></span> NO — Reconcile</span>
+        {% endif %}
+      </span>
+    </div>
+    <div class="kv"><span>Agent engine</span><span class="tag muted">{{ agent_engine }}</span></div>
+    <div class="kv">
+      <span>Embeddings</span>
+      <span>
+        {% if embeddings_fallback %}
+          <span class="text-amber">⚠️ Local fallback</span>
+        {% else %}
+          <span class="text-emerald flex items-center gap-6"><span class="dot-ok"></span> Mesh API</span>
+        {% endif %}
+      </span>
+    </div>
+    <div class="kv">
+      <span>SMTP</span>
+      <span>
+        {% if smtp_configured %}
+          <span class="text-emerald">Configured</span>
+        {% else %}
+          <span class="tag muted">Outbox only (data/outbox)</span>
+        {% endif %}
+      </span>
+    </div>
+
+    <div class="mt-32 pt-24 border-t">
+      <a class="btn ghost sm" href="/admin/system?mesh=1" id="test-mesh-btn">
+        <span>Test Mesh API connection</span>
+      </a>
+      
+      {% if mesh_health %}
+        <div class="alert {{ 'ok' if mesh_health.reachable else 'error' }} mt-16 p-16">
+          <strong>Mesh:</strong> {{ 'Reachable' if mesh_health.reachable else 'Unreachable' }}
+          <div class="muted mt-4 text-13">{{ mesh_health.detail }}</div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <aside class="panel">
+    <div class="flex items-center gap-12 mb-24">
+      <div class="w-40 h-40 rounded-12 bg-blue-100 flex items-center justify-center text-20">⏱️</div>
+      <div>
+        <span class="eyebrow m-0">Proactive delivery</span>
+        <h3 class="m-0 text-18 font-bold">Scheduler</h3>
+      </div>
+    </div>
+
+    <div class="kv">
+      <span>Running</span>
+      <span>
+        {% if scheduler.running %}
+          <span class="text-emerald flex items-center gap-6"><span class="dot-ok"></span> Active</span>
+        {% else %}
+          <span class="text-red flex items-center gap-6"><span class="dot-bad"></span> Stopped</span>
+        {% endif %}
+      </span>
+    </div>
+    
+    {% if scheduler.jobs %}
+      <div class="mt-16 mb-8 text-13 font-semibold text-ink uppercase tracking-wide">Registered Jobs</div>
+      {% for job in scheduler.jobs %}
+        <div class="kv py-8">
+          <span class="text-ink font-medium">{{ job.id }}</span>
+          <span class="muted text-12">{{ job.next_run }}</span>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="kv"><span>Jobs</span><span class="muted">None registered</span></div>
+    {% endif %}
+
+    <div class="mt-32 pt-24 border-t">
+      <form method="post" action="/admin/digest/run" class="m-0" id="digest-form">
+        <button class="btn light w-full justify-center" type="submit" id="digest-btn">Run daily digest now</button>
+      </form>
+      <p class="muted mt-16 m-0 leading-relaxed text-13">
+        Without SMTP configured, generated emails are written to
+        <code class="inline">data/outbox/</code> so you can inspect them.
+      </p>
+    </div>
+  </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.getElementById("test-mesh-btn").addEventListener("click", function (e) {
+    if (this.href.includes('mesh=1')) {
+      this.innerHTML = '<span class="loading-spinner" style="border-color: rgba(15, 23, 42, 0.3); border-top-color: var(--ink);"></span> <span>Testing...</span>';
+      this.style.pointerEvents = 'none';
+    }
+  });
+
+  const digestForm = document.getElementById("digest-form");
+  if (digestForm) {
+    digestForm.addEventListener("submit", function () {
+      const btn = document.getElementById("digest-btn");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-spinner" style="border-color: rgba(99, 102, 241, 0.3); border-top-color: var(--brand);"></span> <span>Running Digest...</span>';
+    });
+  }
+</script>
+{% endblock %}

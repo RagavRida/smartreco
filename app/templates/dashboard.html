@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}For you — {{ app_name }}{% endblock %}
+
+{% block content %}
+{% if recommendation and recommendation.items %}
+  <section class="reco stagger-1">
+    <span class="eyebrow">Picked for you by the SmartReco agent</span>
+    <h2>{{ recommendation.headline }}</h2>
+    <p class="narrative">{{ recommendation.narrative }}</p>
+
+    <div class="reco-items">
+      {% for item in recommendation.items %}
+        <div class="reco-item">
+          {% if item.hook %}<span class="hook">{{ item.hook }}</span>{% endif %}
+          <h4>
+            <a href="/product/{{ item.slug }}" data-track-click="reco-item"
+               data-slug="{{ item.slug }}" data-product-id="{{ item.id }}"
+               data-category="{{ item.category }}">{{ item.title }}</a>
+          </h4>
+          <p class="reason">{{ item.reason }}</p>
+          <div class="foot">
+            <span>{{ item.level|title }} · {{ '%.0f'|format(item.duration_hours) }}h</span>
+            <span>${{ '%.0f'|format(item.price) }}</span>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+{% else %}
+  <section class="reco reco-empty stagger-1">
+    <span class="eyebrow text-gradient">Nothing to recommend yet</span>
+    <h2>Go explore a few courses</h2>
+    <p class="narrative">
+      The agent needs behaviour to reason over. Search for something you care about,
+      open a couple of courses, and your recommendation will appear here.
+    </p>
+    <p class="mt-24"><a class="btn" href="/catalog">Browse the catalog</a></p>
+  </section>
+{% endif %}
+
+<div class="two-col stagger-2">
+  <div class="panel">
+    <span class="eyebrow">Recent activity the agent is watching</span>
+    <h3 class="m-0 mt-10 mb-16 text-20 font-bold">Your behaviour trail</h3>
+    {% if recent_events %}
+      <ul class="timeline">
+        {% for event in recent_events %}
+          <li>
+            <span class="t">{{ event.event_type.replace('_', ' ') }}</span>
+            <span class="d">
+              {% if event.query %}“{{ event.query }}”
+              {% elif event.product and event.product.title %}{{ event.product.title }}
+              {% elif event.path %}{{ event.path }}
+              {% else %}—{% endif %}
+              {% if event.dwell_ms %} <span class="muted">· {{ (event.dwell_ms / 1000)|round|int }}s</span>{% endif %}
+            </span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">No events tracked yet.</p>
+    {% endif %}
+  </div>
+
+  <aside class="panel">
+    <span class="eyebrow">Agent status</span>
+    <h3 class="m-0 mt-10 mb-16 text-20 font-bold">Why you're seeing this</h3>
+    <div class="kv"><span>This page load</span>
+      <span>
+        {% if ran_agent %}
+          <span class="text-emerald">●</span> Agent ran
+        {% else %}
+          <span class="text-brand">●</span> Served from cache
+        {% endif %}
+      </span>
+    </div>
+    <div class="kv"><span>Decision</span><span>{{ decision.reason }}</span></div>
+    <div class="kv"><span>New signals</span><span>{{ decision.new_events }}</span></div>
+    {% if recommendation %}
+      <div class="kv"><span>Events considered</span><span>{{ recommendation.events_considered }}</span></div>
+      <div class="kv"><span>Refinement loops</span><span>{{ recommendation.refine_loops }}</span></div>
+      <div class="kv"><span>Model</span><span>{{ recommendation.model_used or '—' }}</span></div>
+      <div class="kv"><span>Generated in</span><span>{{ recommendation.latency_ms }} ms</span></div>
+    {% endif %}
+    <div class="kv"><span>Agent runs / skips</span>
+      <span>{{ agent_state.runs_total }} / {{ agent_state.runs_skipped }}</span></div>
+
+    <button class="btn light w-full mt-24" id="refresh-reco">
+      Force a refresh
+    </button>
+    <p class="muted mt-16 m-0 leading-relaxed text-13">
+      Skips are the point — the agent only spends an LLM call when your behaviour
+      actually changed.
+    </p>
+  </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.getElementById("refresh-reco").addEventListener("click", function () {
+    var btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading-spinner" style="border-color: rgba(99, 102, 241, 0.3); border-top-color: var(--brand);"></span> <span>Agent is thinking…</span>';
+    if (window.SmartReco) window.SmartReco.flush();
+    fetch("/api/recommendations/refresh", { method: "POST", credentials: "same-origin" })
+      .then(function (r) { 
+        if(!r.ok) throw new Error("Failed to refresh");
+        return r.json(); 
+      })
+      .then(function () { 
+        if(window.showToast) window.showToast("Recommendation refreshed!", "success");
+        setTimeout(() => window.location.reload(), 800); 
+      })
+      .catch(function (e) {
+        if(window.showToast) window.showToast("Failed to refresh.", "error");
+        btn.disabled = false;
+        btn.innerHTML = 'Force a refresh';
+      });
+  });
+</script>
+{% endblock %}
