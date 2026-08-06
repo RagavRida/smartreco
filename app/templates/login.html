@@ -2,40 +2,42 @@
 {% block title %}Sign in — {{ app_name }}{% endblock %}
 
 {% block content %}
-<div class="panel narrow stagger-1 p-48 rounded-24 shadow-lg">
-  <div class="text-center mb-32">
-    <div class="dot w-48 h-48 rounded-full bg-brand-soft inline-block shadow-brand mb-16"></div>
-    <span class="eyebrow block">Welcome back</span>
-    <h1 class="m-0 mt-8 text-28 font-bold">Sign in to {{ app_name }}</h1>
-  </div>
-
-  {% if error %}<div class="alert error">{{ error }}</div>{% endif %}
-
-  <form class="stack" method="post" action="/login">
-    <input type="hidden" name="next" value="{{ next|default('/dashboard') }}">
-    <div>
-      <label for="email">Email address</label>
-      <input id="email" type="email" name="email" value="{{ email|default('') }}" required autofocus placeholder="name@company.com">
+<div class="auth-layout js-reveal animate-reveal">
+  <div class="auth-atmosphere">
+    <div class="live-feed">
+      agent watching 1,204 sessions...
     </div>
-    <div>
-      <label for="password">Password</label>
-      <input id="password" type="password" name="password" required placeholder="••••••••">
-    </div>
-    <button class="btn w-full justify-center p-14 mt-8" type="submit">Sign in</button>
-  </form>
-
-  <div class="text-center mt-32 pt-24 border-t">
-    <p class="muted m-0">
-      No account yet? <a href="/register" class="font-semibold">Create one</a>
-    </p>
   </div>
   
-  <div class="alert info mt-24 text-13 items-start">
-    <span class="text-18">ℹ️</span>
-    <div>
-      <strong class="block mb-4 text-ink">Demo seed accounts</strong>
-      User: <code class="inline">learner@smartreco.dev / learner123</code><br>
-      Admin: <code class="inline">admin@smartreco.dev / admin123</code>
+  <div class="auth-form-container">
+    <div class="auth-card">
+      <h1 class="display">Sign in</h1>
+      <p>Welcome back to {{ app_name }}</p>
+
+      {% if error %}<div style="color: var(--coral); font-size: 14px; margin-bottom: 16px;">{{ error }}</div>{% endif %}
+
+      <form class="stack" method="post" action="/login">
+        <input type="hidden" name="next" value="{{ next|default('/dashboard') }}">
+        <div>
+          <label for="email">Email address</label>
+          <input id="email" type="email" name="email" value="{{ email|default('') }}" required autofocus placeholder="name@company.com">
+        </div>
+        <div>
+          <label for="password">Password</label>
+          <input id="password" type="password" name="password" required placeholder="••••••••">
+        </div>
+        <button class="btn coral w-full mt-16" type="submit">Sign in</button>
+      </form>
+
+      <div class="mt-32 pt-24" style="border-top: 1px solid #E2E0D8; font-size: 14px; color: var(--muted-slate);">
+        No account yet? <a href="/register">Create one</a>
+      </div>
+      
+      <div class="mt-24" style="font-size: 13px; color: var(--muted-slate); background: #E2E0D8; padding: 12px; border-radius: var(--radius); color: var(--night-navy);">
+        <strong>Demo seed accounts</strong><br>
+        <span class="mono">learner@smartreco.dev / learner123</span><br>
+        <span class="mono">admin@smartreco.dev / admin123</span>
+      </div>
     </div>
   </div>
 </div>

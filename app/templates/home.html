@@ -2,62 +2,42 @@
 {% block title %}{{ app_name }} — learn what's next{% endblock %}
 
 {% block content %}
-<section class="hero stagger-1">
-  <div class="hero-content">
-    <span class="eyebrow">Behaviour-driven learning</span>
-    <h1>Courses that find you, based on what you actually do.</h1>
-    <p>
-      Browse the catalog and SmartReco pays attention — what you search, what you open,
-      where you linger. An AI agent turns that into a recommendation written for you,
-      grounded in the real catalog, and it updates as your interests move.
-    </p>
-    <div class="flex gap-16">
-      <a class="btn" href="/catalog" data-track-click="hero-browse">Browse the catalog <span>→</span></a>
-      {% if not current_user %}
-        <a class="btn ghost" href="/register" data-track-click="hero-register">Create an account</a>
-      {% else %}
-        <a class="btn ghost" href="/dashboard" data-track-click="hero-dashboard">See your recommendations</a>
-      {% endif %}
-    </div>
+<section class="js-reveal animate-reveal" style="text-align: center; max-width: 800px; margin: 40px auto 80px;">
+  <span class="eyebrow">Behaviour-driven learning</span>
+  <h1 class="display" style="font-size: 48px; margin-bottom: 24px; color: var(--paper);">Courses that find you, based on what you actually do.</h1>
+  <p style="font-size: 18px; color: var(--muted-slate); line-height: 1.6; margin-bottom: 40px;">
+    Browse the catalog and SmartReco pays attention — what you search, what you open,
+    where you linger. An AI agent turns that into a recommendation written for you,
+    grounded in the real catalog, and it updates as your interests move.
+  </p>
+  <div class="flex justify-center gap-16">
+    <a class="btn coral" href="/catalog" data-track-click="hero-browse">Browse the catalog</a>
+    {% if not current_user %}
+      <a class="btn ghost" href="/register" data-track-click="hero-register">Create an account</a>
+    {% else %}
+      <a class="btn ghost" href="/dashboard" data-track-click="hero-dashboard">See your recommendations</a>
+    {% endif %}
   </div>
 </section>
 
-<div class="stats stagger-2 mb-60">
-  <div class="stat">
-    <div class="n">1.</div>
-    <div class="l">Track Behavior</div>
-    <p class="muted mt-8 leading-normal">Passive, non-blocking telemetry gathers deep intent.</p>
-  </div>
-  <div class="stat">
-    <div class="n">2.</div>
-    <div class="l">AI Agent Reasoning</div>
-    <p class="muted mt-8 leading-normal">Analyzes intent, filters, and loops for optimal context.</p>
-  </div>
-  <div class="stat">
-    <div class="n">3.</div>
-    <div class="l">Persuasive Delivery</div>
-    <p class="muted mt-8 leading-normal">Generates a dynamic, deeply relevant recommendation.</p>
-  </div>
-</div>
-
-<div class="page-head stagger-3">
-  <h1>Top rated right now</h1>
+<div class="page-head js-reveal animate-reveal">
+  <h1 class="display">Top rated right now</h1>
   <p>Explore a few — your dashboard gets more personal the more you look around.</p>
 </div>
 
-<div class="grid stagger-4">
+<div class="grid js-reveal animate-reveal">
   {% for product in featured %}
     {% include "_product_card.html" %}
   {% endfor %}
 </div>
 
 {% if categories %}
-<div class="page-head mt-60">
-  <h1>Browse by category</h1>
+<div class="page-head mt-60 js-reveal animate-reveal">
+  <h1 class="display">Browse by category</h1>
 </div>
-<div class="filters">
+<div class="flex gap-16 mb-40 flex-wrap js-reveal animate-reveal">
   {% for category in categories %}
-    <a class="chip" href="/catalog?category={{ category }}"
+    <a class="btn ghost" href="/catalog?category={{ category }}"
        data-track-click="category-chip" data-category="{{ category }}">{{ category|title }}</a>
   {% endfor %}
 </div>

@@ -1,17 +1,17 @@
-<article class="card m-0 opacity-1 transform-none">
-  <div class="meta m-0 mb-16 p-0 border-none">
-    <span class="tag bg-bg capitalize">{{ product.category|title }}</span>
-    <span class="tag level ml-auto capitalize">{{ product.level|title }}</span>
+<article class="card">
+  <div class="meta" style="margin-top: 0; padding-top: 0; border-top: none; margin-bottom: 16px;">
+    <span class="tag">{{ product.category }}</span>
+    <span class="tag ml-auto" style="background: transparent; color: var(--muted-slate); border: 1px solid var(--muted-slate);">{{ product.level }}</span>
   </div>
-  <h3>
+  <h3 class="display">
     <a href="/product/{{ product.slug }}" data-track-click="product-card"
        data-slug="{{ product.slug }}" data-product-id="{{ product.id }}"
        data-category="{{ product.category }}">{{ product.title }}</a>
   </h3>
   <p>{{ product.description[:118] }}{% if product.description|length > 118 %}…{% endif %}</p>
-  <div class="meta">
+  <div class="meta" style="margin-top: auto; padding-top: 16px; border-top: 1px solid #E2E0D8;">
     <span class="price">${{ '%.0f'|format(product.price) }}</span>
-    <span class="flex items-center gap-4"><span class="text-amber">★</span> <span class="font-semibold text-ink">{{ '%.1f'|format(product.rating) }}</span></span>
+    <span class="flex items-center gap-4">★ <span style="font-weight: 600; color: var(--night-navy);">{{ '%.1f'|format(product.rating) }}</span></span>
     <span>{{ '%.0f'|format(product.duration_hours) }}h</span>
     {% if product.instructor %}<span class="ml-auto overflow-hidden text-ellipsis whitespace-nowrap max-w-80" title="{{ product.instructor }}">{{ product.instructor }}</span>{% endif %}
   </div>

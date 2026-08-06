@@ -2,34 +2,34 @@
 {% block title %}Products — Admin{% endblock %}
 
 {% block content %}
-<div class="page-head stagger-1 flex justify-between items-end gap-20 flex-wrap">
+<div class="page-head flex justify-between items-end gap-20 flex-wrap js-reveal animate-reveal">
   <div>
     <span class="eyebrow">Admin</span>
-    <h1>Product catalog</h1>
+    <h1 class="display" style="font-size: 32px; color: var(--paper);">Product catalog</h1>
     <p>Every change is dual-written to SQL and the vector database.</p>
   </div>
   <div class="flex gap-12">
     <form method="post" action="/admin/reconcile" class="m-0" id="reconcile-form">
       <button class="btn ghost" type="submit" id="reconcile-btn">Reconcile stores</button>
     </form>
-    <a class="btn" href="/admin/products/new">New product</a>
+    <a class="btn coral" href="/admin/products/new">New product</a>
   </div>
 </div>
 
-{% if flash %}<div class="alert ok stagger-2">{{ flash }}</div>{% endif %}
+{% if flash %}<div class="js-reveal animate-reveal" style="padding: 16px; background: #E6F7F4; color: #047857; border-radius: var(--radius); margin-bottom: 24px;">{{ flash }}</div>{% endif %}
 
-<div class="alert {{ 'ok' if sync.in_sync else 'info' }} stagger-2 bg-surface border border-line border-l-4 {{ 'border-emerald' if sync.in_sync else 'border-amber' }}">
+<div class="js-reveal animate-reveal mb-32" style="background: var(--paper); border-radius: var(--radius-lg); border-left: 4px solid {{ '#10b981' if sync.in_sync else '#f59e0b' }}; padding: 24px;">
   <div class="flex flex-col gap-8 w-full">
     <div class="flex justify-between items-center">
-      <strong class="text-ink text-16">Sync status</strong>
+      <strong style="color: var(--night-navy); font-size: 16px;">Sync status</strong>
       {% if sync.in_sync %}
-        <span class="tag bg-emerald-100 text-emerald-700"><span class="dot-ok mr-6 shadow-none w-8 h-8"></span>In sync</span>
+        <span class="tag" style="background: #E6F7F4; color: #047857; border: 1px solid #A7F3D0;">In sync</span>
       {% else %}
-        <span class="tag bg-amber-100 text-amber"><span class="dot-bad bg-amber mr-6 shadow-none w-8 h-8"></span>Drift detected</span>
+        <span class="tag" style="background: #FEF3C7; color: #B45309; border: 1px solid #FDE68A;">Drift detected</span>
       {% endif %}
     </div>
-    <div class="flex gap-16 flex-wrap text-ink-soft">
-      <span>Backend: <code class="inline">{{ sync.backend }}</code></span>
+    <div class="flex gap-16 flex-wrap" style="color: #626883; font-family: var(--font-mono); font-size: 13px;">
+      <span>Backend: <strong>{{ sync.backend }}</strong></span>
       <span>•</span>
       <span><strong>{{ sync.sql_published }}</strong> published in SQL</span>
       <span>•</span>
@@ -40,55 +40,58 @@
   </div>
 </div>
 
-<div class="panel stagger-3 p-0 overflow-x-auto">
+<div class="admin-panel js-reveal animate-reveal p-0 overflow-x-auto">
   <table class="m-0">
-    <thead class="bg-bg">
+    <thead style="background: rgba(0,0,0,0.03);">
       <tr>
-        <th class="pl-24">Title</th>
+        <th style="padding-left: 24px;">Title</th>
         <th>Category</th>
         <th>Level</th>
         <th>Price</th>
         <th>Vector</th>
         <th>Status</th>
-        <th class="pr-24"></th>
+        <th style="padding-right: 24px;"></th>
       </tr>
     </thead>
     <tbody>
       {% for product in products %}
         <tr>
-          <td class="pl-24">
-            <strong class="text-ink">{{ product.title }}</strong><br>
-            <span class="muted text-12">{{ product.slug }}</span>
+          <td style="padding-left: 24px;">
+            <strong style="color: var(--night-navy);">{{ product.title }}</strong><br>
+            <span style="color: #626883; font-family: var(--font-mono); font-size: 12px;">{{ product.slug }}</span>
           </td>
-          <td><span class="tag muted">{{ product.category }}</span></td>
-          <td><span class="tag level text-11">{{ product.level }}</span></td>
-          <td class="font-semibold">${{ '%.0f'|format(product.price) }}</td>
+          <td><span class="tag">{{ product.category }}</span></td>
+          <td><span class="tag" style="background: transparent; border: 1px solid #626883; color: #626883;">{{ product.level }}</span></td>
+          <td style="font-weight: 600;">${{ '%.0f'|format(product.price) }}</td>
           <td>
-            <div class="flex items-center gap-8">
-              <span class="{{ 'dot-ok' if product.vector_synced else 'dot-bad' }}"></span>
-              <span class="tabular-nums">v{{ product.vector_version }}</span>
+            <div class="flex items-center gap-8 font-mono text-13">
+              {% if product.vector_synced %}
+                <span class="sync-chip">v{{ product.vector_version }} ✓</span>
+              {% else %}
+                <span class="sync-chip" style="background: #FEF3C7; color: #B45309; border-color: #FDE68A;">v{{ product.vector_version }} ✗</span>
+              {% endif %}
             </div>
             {% if product.vector_error %}
-              <div class="muted text-12 text-red mt-4" title="{{ product.vector_error }}">sync error</div>
+              <div style="color: var(--coral); font-size: 12px; margin-top: 4px;" title="{{ product.vector_error }}">sync error</div>
             {% endif %}
           </td>
           <td>
             {% if product.is_published %}
-              <span class="text-emerald font-medium">Published</span>
+              <span style="color: #047857; font-weight: 500;">Published</span>
             {% else %}
-              <span class="muted">Draft</span>
+              <span style="color: #626883;">Draft</span>
             {% endif %}
           </td>
-          <td class="text-right whitespace-nowrap pr-24">
-            <a class="btn ghost sm" href="/admin/products/{{ product.id }}/edit">Edit</a>
+          <td class="text-right whitespace-nowrap" style="padding-right: 24px;">
+            <a class="btn ghost" style="padding: 6px 12px; font-size: 13px;" href="/admin/products/{{ product.id }}/edit">Edit</a>
             <form method="post" action="/admin/products/{{ product.id }}/delete"
                   class="inline-block" onsubmit="return confirm('Delete this product from SQL and the vector store? This cannot be undone.');">
-              <button class="btn danger sm ml-4" type="submit">Delete</button>
+              <button class="btn coral" style="padding: 6px 12px; font-size: 13px; margin-left: 8px;" type="submit">Delete</button>
             </form>
           </td>
         </tr>
       {% else %}
-        <tr><td colspan="7" class="muted p-40 text-center">No products yet. <br><br><a href="/admin/products/new" class="btn light sm">Create one now</a></td></tr>
+        <tr><td colspan="7" class="text-center" style="padding: 40px; color: #626883;">No products yet. <br><br><a href="/admin/products/new" class="btn ghost">Create one now</a></td></tr>
       {% endfor %}
     </tbody>
   </table>
@@ -98,9 +101,9 @@
 {% block scripts %}
 <script>
   document.getElementById("reconcile-form").addEventListener("submit", function () {
-    const btn = document.getElementById("reconcile-btn");
+    var btn = document.getElementById("reconcile-btn");
     btn.disabled = true;
-    btn.innerHTML = '<span class="loading-spinner" style="border-color: rgba(15, 23, 42, 0.3); border-top-color: var(--ink);"></span> <span>Reconciling...</span>';
+    btn.innerHTML = 'Reconciling...';
   });
 </script>
 {% endblock %}

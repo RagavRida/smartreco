@@ -2,46 +2,46 @@
 {% block title %}Catalog — {{ app_name }}{% endblock %}
 
 {% block content %}
-<div class="page-head stagger-1">
-  <h1>{% if query %}Results for “{{ query }}”{% elif selected_category %}{{ selected_category|title }}{% else %}All courses{% endif %}</h1>
+<div class="page-head js-reveal animate-reveal">
+  <h1 class="display">{% if query %}Results for “{{ query }}”{% elif selected_category %}{{ selected_category|title }}{% else %}All courses{% endif %}</h1>
   <p>{{ products|length }} course{{ '' if products|length == 1 else 's' }} in the catalog.</p>
 </div>
 
-<div class="filters stagger-2">
-  <a class="chip {{ 'active' if not selected_category }}" href="/catalog{% if query %}?q={{ query }}{% endif %}">All</a>
+<div class="flex flex-wrap gap-12 mb-32 items-center js-reveal animate-reveal">
+  <a class="btn {{ 'coral' if not selected_category else 'ghost' }}" href="/catalog{% if query %}?q={{ query }}{% endif %}">All</a>
   {% for category in categories %}
-    <a class="chip {{ 'active' if selected_category == category }}"
+    <a class="btn {{ 'coral' if selected_category == category else 'ghost' }}"
        href="/catalog?category={{ category }}{% if query %}&q={{ query }}{% endif %}"
        data-track-click="filter-category" data-category="{{ category }}">{{ category|title }}</a>
   {% endfor %}
-  <span class="inline-block border-r border-line h-24 mx-8 w-14"></span>
+  <span style="display: inline-block; width: 1px; height: 24px; background: var(--raised-navy); margin: 0 8px;"></span>
   {% for lvl in ['beginner', 'intermediate', 'advanced'] %}
-    <a class="chip {{ 'active' if selected_level == lvl }}"
+    <a class="btn {{ 'coral' if selected_level == lvl else 'ghost' }}"
        href="/catalog?level={{ lvl }}{% if selected_category %}&category={{ selected_category }}{% endif %}"
        data-track-click="filter-level">{{ lvl|title }}</a>
   {% endfor %}
 </div>
 
 {% if products %}
-  <div class="grid stagger-3">
+  <div class="grid js-reveal animate-reveal">
     {% for product in products %}{% include "_product_card.html" %}{% endfor %}
   </div>
 {% else %}
-  <div class="panel stagger-3 text-center p-60-40">
+  <div class="js-reveal animate-reveal text-center" style="padding: 60px 40px; background: var(--raised-navy); border-radius: var(--radius-lg); margin-bottom: 40px;">
     <span class="eyebrow">No results</span>
-    <h2 class="m-0 my-12 text-24">Nothing matched your filter</h2>
+    <h2 class="display" style="font-size: 24px; margin-bottom: 12px; color: var(--paper);">Nothing matched your filter</h2>
     <p class="muted m-0">Try clearing the filters or searching for something else.</p>
-    <a href="/catalog" class="btn light mt-24">View all courses</a>
+    <a href="/catalog" class="btn coral mt-24">View all courses</a>
   </div>
 {% endif %}
 
 {% if semantic %}
-  <div class="page-head stagger-4 mt-60">
+  <div class="page-head mt-60 js-reveal animate-reveal">
     <span class="eyebrow">Semantically related</span>
-    <h1 class="text-24">You might also mean these</h1>
+    <h1 class="display">You might also mean these</h1>
     <p>Pulled from the vector database — matched on meaning, not keywords.</p>
   </div>
-  <div class="grid stagger-4">
+  <div class="grid js-reveal animate-reveal">
     {% for product in semantic %}{% include "_product_card.html" %}{% endfor %}
   </div>
 {% endif %}

@@ -2,131 +2,146 @@
 {% block title %}System — Admin{% endblock %}
 
 {% block content %}
-<div class="page-head stagger-1">
+<div class="page-head js-reveal animate-reveal">
   <span class="eyebrow">Admin</span>
-  <h1>System Dashboard</h1>
+  <h1 class="display" style="font-size: 32px; color: var(--paper);">System Dashboard</h1>
   <p>What is wired up, and what is degraded.</p>
 </div>
 
-{% if flash %}<div class="alert ok stagger-1">{{ flash }}</div>{% endif %}
+{% if flash %}<div class="js-reveal animate-reveal" style="padding: 16px; background: #E6F7F4; color: #047857; border-radius: var(--radius); margin-bottom: 24px;">{{ flash }}</div>{% endif %}
 
-<div class="stats stagger-2 mb-32">
-  <div class="stat">
-    <div class="l">Users</div>
-    <div class="n mt-8">{{ counts.users }}</div>
+<div class="js-reveal animate-reveal" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-bottom: 32px;">
+  <div style="background: var(--paper); border: 1px solid var(--raised-navy); border-radius: var(--radius-lg); padding: 24px;">
+    <div style="font-size: 13px; color: #626883; font-weight: 500;">Users</div>
+    <div class="display" style="font-size: 32px; font-weight: 700; color: var(--night-navy); margin-top: 8px;">{{ counts.users }}</div>
   </div>
-  <div class="stat">
-    <div class="l">Products</div>
-    <div class="n mt-8">{{ counts.products }}</div>
+  <div style="background: var(--paper); border: 1px solid var(--raised-navy); border-radius: var(--radius-lg); padding: 24px;">
+    <div style="font-size: 13px; color: #626883; font-weight: 500;">Products</div>
+    <div class="display" style="font-size: 32px; font-weight: 700; color: var(--night-navy); margin-top: 8px;">{{ counts.products }}</div>
   </div>
-  <div class="stat">
-    <div class="l">Events Tracked</div>
-    <div class="n mt-8">{{ counts.events }}</div>
+  <div style="background: var(--paper); border: 1px solid var(--raised-navy); border-radius: var(--radius-lg); padding: 24px;">
+    <div style="font-size: 13px; color: #626883; font-weight: 500;">Events Tracked</div>
+    <div class="display" style="font-size: 32px; font-weight: 700; color: var(--night-navy); margin-top: 8px;">{{ counts.events }}</div>
   </div>
-  <div class="stat">
-    <div class="l">Recommendations</div>
-    <div class="n mt-8 text-brand">{{ counts.recommendations }}</div>
+  <div style="background: var(--paper); border: 1px solid var(--raised-navy); border-radius: var(--radius-lg); padding: 24px;">
+    <div style="font-size: 13px; color: #626883; font-weight: 500;">Recommendations</div>
+    <div class="display" style="font-size: 32px; font-weight: 700; color: var(--signal-teal); margin-top: 8px;">{{ counts.recommendations }}</div>
   </div>
 </div>
 
-<div class="two-col stagger-3">
-  <div class="panel">
-    <div class="flex items-center gap-12 mb-24">
-      <div class="w-40 h-40 rounded-12 bg-brand-soft flex items-center justify-center text-20">⚙️</div>
+<div class="js-reveal animate-reveal" style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start;">
+  <div class="admin-panel">
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+      <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(79, 224, 200, 0.1); display: flex; align-items: center; justify-content: center; font-size: 20px;">⚙️</div>
       <div>
-        <span class="eyebrow m-0">Pipeline</span>
-        <h3 class="m-0 text-18 font-bold">Components</h3>
+        <span class="eyebrow m-0" style="color: #626883;">Pipeline</span>
+        <h3 class="m-0" style="font-size: 18px; font-weight: 700;">Components</h3>
       </div>
     </div>
     
-    <div class="kv"><span>Vector backend</span><span class="tag muted">{{ vector_backend }}</span></div>
-    <div class="kv"><span>Vector documents</span><span class="tabular-nums">{{ sync.vector_documents }}</span></div>
-    <div class="kv"><span>SQL published products</span><span class="tabular-nums">{{ sync.sql_published }}</span></div>
-    <div class="kv">
-      <span>Stores in sync</span>
+    <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #E2E0D8; font-size: 14px;">
+      <span style="color: #626883;">Vector backend</span>
+      <span class="tag">{{ vector_backend }}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #E2E0D8; font-size: 14px;">
+      <span style="color: #626883;">Vector documents</span>
+      <span style="font-family: var(--font-mono); font-weight: 600;">{{ sync.vector_documents }}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #E2E0D8; font-size: 14px;">
+      <span style="color: #626883;">SQL published products</span>
+      <span style="font-family: var(--font-mono); font-weight: 600;">{{ sync.sql_published }}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #E2E0D8; font-size: 14px;">
+      <span style="color: #626883;">Stores in sync</span>
       <span>
         {% if sync.in_sync %}
-          <span class="text-emerald flex items-center gap-6"><span class="dot-ok"></span> Yes</span>
+          <span style="color: #047857; font-weight: 500;">Yes</span>
         {% else %}
-          <span class="text-red flex items-center gap-6"><span class="dot-bad"></span> NO — Reconcile</span>
+          <span style="color: #991B1B; font-weight: 500;">NO — Reconcile</span>
         {% endif %}
       </span>
     </div>
-    <div class="kv"><span>Agent engine</span><span class="tag muted">{{ agent_engine }}</span></div>
-    <div class="kv">
-      <span>Embeddings</span>
+    <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #E2E0D8; font-size: 14px;">
+      <span style="color: #626883;">Agent engine</span>
+      <span class="tag">{{ agent_engine }}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #E2E0D8; font-size: 14px;">
+      <span style="color: #626883;">Embeddings</span>
       <span>
         {% if embeddings_fallback %}
-          <span class="text-amber">⚠️ Local fallback</span>
+          <span style="color: #B45309; font-weight: 500;">⚠️ Local fallback</span>
         {% else %}
-          <span class="text-emerald flex items-center gap-6"><span class="dot-ok"></span> Mesh API</span>
+          <span style="color: #047857; font-weight: 500;">Mesh API</span>
         {% endif %}
       </span>
     </div>
-    <div class="kv">
-      <span>SMTP</span>
+    <div style="display: flex; justify-content: space-between; padding: 10px 0; font-size: 14px;">
+      <span style="color: #626883;">SMTP</span>
       <span>
         {% if smtp_configured %}
-          <span class="text-emerald">Configured</span>
+          <span style="color: #047857; font-weight: 500;">Configured</span>
         {% else %}
-          <span class="tag muted">Outbox only (data/outbox)</span>
+          <span class="tag">Outbox only (data/outbox)</span>
         {% endif %}
       </span>
     </div>
 
-    <div class="mt-32 pt-24 border-t">
-      <a class="btn ghost sm" href="/admin/system?mesh=1" id="test-mesh-btn">
+    <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #E2E0D8;">
+      <a class="btn ghost" style="padding: 8px 16px; font-size: 13px;" href="/admin/system?mesh=1" id="test-mesh-btn">
         <span>Test Mesh API connection</span>
       </a>
       
       {% if mesh_health %}
-        <div class="alert {{ 'ok' if mesh_health.reachable else 'error' }} mt-16 p-16">
+        <div style="margin-top: 16px; padding: 16px; border-radius: var(--radius); background: {{ '#E6F7F4' if mesh_health.reachable else '#FEF2F2' }}; color: {{ '#047857' if mesh_health.reachable else '#991B1B' }}; border: 1px solid {{ '#A7F3D0' if mesh_health.reachable else '#FECACA' }};">
           <strong>Mesh:</strong> {{ 'Reachable' if mesh_health.reachable else 'Unreachable' }}
-          <div class="muted mt-4 text-13">{{ mesh_health.detail }}</div>
+          <div style="font-size: 13px; opacity: 0.8; margin-top: 4px;">{{ mesh_health.detail }}</div>
         </div>
       {% endif %}
     </div>
   </div>
 
-  <aside class="panel">
-    <div class="flex items-center gap-12 mb-24">
-      <div class="w-40 h-40 rounded-12 bg-blue-100 flex items-center justify-center text-20">⏱️</div>
+  <aside class="admin-panel">
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+      <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(99, 102, 241, 0.1); display: flex; align-items: center; justify-content: center; font-size: 20px;">⏱️</div>
       <div>
-        <span class="eyebrow m-0">Proactive delivery</span>
-        <h3 class="m-0 text-18 font-bold">Scheduler</h3>
+        <span class="eyebrow m-0" style="color: #626883;">Proactive delivery</span>
+        <h3 class="m-0" style="font-size: 18px; font-weight: 700;">Scheduler</h3>
       </div>
     </div>
 
-    <div class="kv">
-      <span>Running</span>
+    <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #E2E0D8; font-size: 14px;">
+      <span style="color: #626883;">Running</span>
       <span>
         {% if scheduler.running %}
-          <span class="text-emerald flex items-center gap-6"><span class="dot-ok"></span> Active</span>
+          <span style="color: #047857; font-weight: 500;">Active</span>
         {% else %}
-          <span class="text-red flex items-center gap-6"><span class="dot-bad"></span> Stopped</span>
+          <span style="color: #991B1B; font-weight: 500;">Stopped</span>
         {% endif %}
       </span>
     </div>
     
     {% if scheduler.jobs %}
-      <div class="mt-16 mb-8 text-13 font-semibold text-ink uppercase tracking-wide">Registered Jobs</div>
+      <div style="margin-top: 16px; margin-bottom: 8px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--night-navy);">Registered Jobs</div>
       {% for job in scheduler.jobs %}
-        <div class="kv py-8">
-          <span class="text-ink font-medium">{{ job.id }}</span>
-          <span class="muted text-12">{{ job.next_run }}</span>
+        <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; border-bottom: 1px solid #E2E0D8;">
+          <span style="font-weight: 500;">{{ job.id }}</span>
+          <span style="font-size: 12px; color: #626883;">{{ job.next_run }}</span>
         </div>
       {% endfor %}
     {% else %}
-      <div class="kv"><span>Jobs</span><span class="muted">None registered</span></div>
+      <div style="display: flex; justify-content: space-between; padding: 10px 0; font-size: 14px;">
+        <span style="color: #626883;">Jobs</span>
+        <span style="color: #626883;">None registered</span>
+      </div>
     {% endif %}
 
-    <div class="mt-32 pt-24 border-t">
-      <form method="post" action="/admin/digest/run" class="m-0" id="digest-form">
-        <button class="btn light w-full justify-center" type="submit" id="digest-btn">Run daily digest now</button>
+    <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #E2E0D8;">
+      <form method="post" action="/admin/digest/run" style="margin: 0;" id="digest-form">
+        <button class="btn ghost w-full" style="justify-content: center;" type="submit" id="digest-btn">Run daily digest now</button>
       </form>
-      <p class="muted mt-16 m-0 leading-relaxed text-13">
+      <p style="color: #626883; margin-top: 16px; margin-bottom: 0; font-size: 13px; line-height: 1.5;">
         Without SMTP configured, generated emails are written to
-        <code class="inline">data/outbox/</code> so you can inspect them.
+        <code style="font-family: var(--font-mono); background: #E2E0D8; padding: 2px 6px; border-radius: 4px;">data/outbox/</code> so you can inspect them.
       </p>
     </div>
   </aside>
@@ -137,7 +152,7 @@
 <script>
   document.getElementById("test-mesh-btn").addEventListener("click", function (e) {
     if (this.href.includes('mesh=1')) {
-      this.innerHTML = '<span class="loading-spinner" style="border-color: rgba(15, 23, 42, 0.3); border-top-color: var(--ink);"></span> <span>Testing...</span>';
+      this.innerHTML = '<span class="loading-spinner"></span> <span style="margin-left: 8px;">Testing...</span>';
       this.style.pointerEvents = 'none';
     }
   });
@@ -147,7 +162,7 @@
     digestForm.addEventListener("submit", function () {
       const btn = document.getElementById("digest-btn");
       btn.disabled = true;
-      btn.innerHTML = '<span class="loading-spinner" style="border-color: rgba(99, 102, 241, 0.3); border-top-color: var(--brand);"></span> <span>Running Digest...</span>';
+      btn.innerHTML = '<span class="loading-spinner"></span> <span style="margin-left: 8px;">Running Digest...</span>';
     });
   }
 </script>

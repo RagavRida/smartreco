@@ -65,10 +65,12 @@ def render(
     status_code: int = 200,
     **kwargs,
 ):
+    import os
     payload = {"request": request}
     payload.update(context or {})
     payload.update(kwargs)
     payload.setdefault("current_user", None)
+    payload.setdefault("show_debug_tracking", os.environ.get("SHOW_DEBUG_TRACKING", "").strip().lower() in ("1", "true", "yes", "on"))
     return templates.TemplateResponse(request, template, payload, status_code=status_code)
 
 

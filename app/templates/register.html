@@ -2,35 +2,36 @@
 {% block title %}Create account — {{ app_name }}{% endblock %}
 
 {% block content %}
-<div class="panel narrow stagger-1 p-48 rounded-24 shadow-lg">
-  <div class="text-center mb-32">
-    <div class="dot w-48 h-48 rounded-full bg-brand-soft inline-block shadow-brand mb-16"></div>
-    <span class="eyebrow block">Get started</span>
-    <h1 class="m-0 mt-8 text-28 font-bold">Create your account</h1>
+<div class="auth-layout js-reveal animate-reveal">
+  <div class="auth-atmosphere">
+    <div class="live-feed">
+      agent watching 1,204 sessions...
+    </div>
   </div>
+  
+  <div class="auth-form-container">
+    <div class="auth-card">
+      <h1 class="display">Create account</h1>
+      <p>Join {{ app_name }} today</p>
 
-  {% if error %}<div class="alert error">{{ error }}</div>{% endif %}
+      {% if error %}<div style="color: var(--coral); font-size: 14px; margin-bottom: 16px;">{{ error }}</div>{% endif %}
 
-  <form class="stack" method="post" action="/register">
-    <div>
-      <label for="name">Full Name</label>
-      <input id="name" type="text" name="name" value="{{ name|default('') }}" placeholder="Ada Lovelace (Optional)">
-    </div>
-    <div>
-      <label for="email">Email address</label>
-      <input id="email" type="email" name="email" value="{{ email|default('') }}" required placeholder="ada@example.com">
-    </div>
-    <div>
-      <label for="password">Password</label>
-      <input id="password" type="password" name="password" required minlength="6" placeholder="•••••••• (Min. 6 chars)">
-    </div>
-    <button class="btn w-full justify-center p-14 mt-8" type="submit">Create account</button>
-  </form>
+      <form class="stack" method="post" action="/register">
+        <div>
+          <label for="email">Email address</label>
+          <input id="email" type="email" name="email" value="{{ email|default('') }}" required autofocus placeholder="name@company.com">
+        </div>
+        <div>
+          <label for="password">Password</label>
+          <input id="password" type="password" name="password" required placeholder="••••••••">
+        </div>
+        <button class="btn coral w-full mt-16" type="submit">Create account</button>
+      </form>
 
-  <div class="text-center mt-32 pt-24 border-t">
-    <p class="muted m-0">
-      Already registered? <a href="/login" class="font-semibold">Sign in</a>
-    </p>
+      <div class="mt-32 pt-24" style="border-top: 1px solid #E2E0D8; font-size: 14px; color: var(--muted-slate);">
+        Already have an account? <a href="/login">Sign in</a>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}

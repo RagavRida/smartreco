@@ -1,4 +1,4 @@
-"""Convenience entry point: `python run.py` (equivalent to uvicorn app.main:app)."""
+"""Convenience entry point: `python3 run.py` (equivalent to uvicorn app.main:app)."""
 from __future__ import annotations
 
 import os

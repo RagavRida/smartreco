@@ -11,60 +11,74 @@
 } %}
 
 {% block content %}
-<div class="two-col">
-  <div class="stagger-1">
+<div class="js-reveal animate-reveal" style="display: grid; grid-template-columns: 2fr 1fr; gap: 40px; align-items: start;">
+  <div>
     <div class="page-head mb-24">
       <span class="eyebrow">{{ product.category|title }} · {{ product.level|title }}</span>
-      <h1 class="text-38 leading-snug">{{ product.title }}</h1>
-      <p class="mt-12 text-16 text-ink-soft">
-        {% if product.instructor %}<span class="font-medium text-ink">Taught by {{ product.instructor }}</span> <span class="mx-8">·</span> {% endif %}
-        <span class="text-amber">★</span> <span class="font-semibold text-ink">{{ '%.1f'|format(product.rating) }}</span> 
+      <h1 class="display" style="font-size: 40px; color: var(--paper);">{{ product.title }}</h1>
+      <p class="mt-12" style="font-size: 16px; color: var(--muted-slate);">
+        {% if product.instructor %}<span style="color: var(--paper);">Taught by {{ product.instructor }}</span> <span class="mx-8">·</span> {% endif %}
+        <span style="color: var(--signal-teal);">★</span> <span style="font-weight: 600; color: var(--paper);">{{ '%.1f'|format(product.rating) }}</span> 
         <span class="mx-8">·</span> {{ '%.0f'|format(product.duration_hours) }} hours
       </p>
     </div>
 
-    <div class="panel p-40 rounded-24 shadow-none border border-line">
-      <h3 class="m-0 mt-0 text-20 font-semibold mb-16">About this course</h3>
-      <p class="m-0 whitespace-pre-line text-16 leading-loose text-ink-soft">{{ product.description }}</p>
+    <div style="background: var(--paper); color: var(--night-navy); padding: 40px; border-radius: var(--radius-lg); border: 1px solid var(--raised-navy);">
+      <h3 class="display" style="font-size: 24px; margin-bottom: 24px; margin-top: 0;">About this course</h3>
+      <p style="margin: 0; white-space: pre-line; font-size: 16px; line-height: 1.8; color: #4A506A;">{{ product.description }}</p>
       
       {% if product.tag_list %}
-        <div class="filters m-0 mt-32">
-          {% for tag in product.tag_list %}<span class="tag muted">{{ tag }}</span>{% endfor %}
+        <div class="flex gap-8 flex-wrap mt-32">
+          {% for tag in product.tag_list %}<span class="tag">{{ tag }}</span>{% endfor %}
         </div>
       {% endif %}
     </div>
+    
+    {% if show_debug_tracking %}
+      <div style="margin-top: 16px; padding: 12px; background: rgba(79, 224, 200, 0.1); border: 1px dashed var(--signal-teal); border-radius: var(--radius); font-family: var(--font-mono); font-size: 12px; color: var(--signal-teal);">
+        [Dev Mode] Tracking product view. Dwell time and scroll depth are being actively monitored on this page.
+      </div>
+    {% endif %}
   </div>
 
-  <aside class="stagger-2">
-    <div class="panel sticky-top p-32 rounded-24 shadow-lg">
-      <div class="text-36 font-bold tracking-tighter text-ink">
+  <aside>
+    <div style="background: var(--paper); color: var(--night-navy); padding: 32px; border-radius: var(--radius-lg); border: 1px solid var(--raised-navy); position: sticky; top: 100px;">
+      <div class="display" style="font-size: 40px; font-weight: 700;">
         ${{ '%.0f'|format(product.price) }}
       </div>
-      <p class="muted m-0 mt-8 mb-24 font-medium">One-time purchase · lifetime access</p>
-      <button class="btn w-full justify-center p-16" data-track-click="enroll"
+      <p style="color: #626883; font-size: 14px; font-weight: 500; margin-top: 8px; margin-bottom: 24px;">One-time purchase · lifetime access</p>
+      <button class="btn coral w-full" data-track-click="enroll"
               data-product-id="{{ product.id }}" data-slug="{{ product.slug }}"
-              data-category="{{ product.category }}" id="enroll-btn">Enroll now</button>
-      <div class="mt-24">
-        <div class="kv"><span>Level</span><span class="tag level text-11">{{ product.level|title }}</span></div>
-        <div class="kv"><span>Duration</span><span>{{ '%.0f'|format(product.duration_hours) }} hours</span></div>
-        <div class="kv"><span>Rating</span><span><span class="text-amber">★</span> {{ '%.1f'|format(product.rating) }}</span></div>
+              data-category="{{ product.category }}" id="enroll-btn" style="padding: 12px; font-size: 16px;">Enroll now</button>
+      <div class="mt-24" style="border-top: 1px solid #E2E0D8; padding-top: 24px;">
+        <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px;">
+          <span style="color: #626883;">Level</span>
+          <span class="tag" style="background: transparent; border: 1px solid #626883; color: #626883;">{{ product.level|title }}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px;">
+          <span style="color: #626883;">Duration</span>
+          <span style="font-weight: 600;">{{ '%.0f'|format(product.duration_hours) }} hours</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px;">
+          <span style="color: #626883;">Rating</span>
+          <span style="font-weight: 600;">★ {{ '%.1f'|format(product.rating) }}</span>
+        </div>
       </div>
     </div>
     {% if not current_user %}
-      <div class="alert info mt-24">
-        <span class="text-20">💡</span>
-        <p class="m-0"><a href="/register" class="font-semibold">Create an account</a> and your browsing starts shaping personalised recommendations.</p>
+      <div style="margin-top: 24px; padding: 16px; background: var(--raised-navy); border-radius: var(--radius); font-size: 14px; color: var(--paper);">
+        💡 <a href="/register" style="color: var(--signal-teal); font-weight: 600;">Create an account</a> and your browsing starts shaping personalised recommendations.
       </div>
     {% endif %}
   </aside>
 </div>
 
 {% if related %}
-  <div class="page-head stagger-3 mt-80">
+  <div class="page-head mt-80 js-reveal animate-reveal">
     <span class="eyebrow">Semantically similar</span>
-    <h1 class="text-24">Learners often pair this with</h1>
+    <h1 class="display">Learners often pair this with</h1>
   </div>
-  <div class="grid stagger-4">
+  <div class="grid js-reveal animate-reveal">
     {% for product in related %}{% include "_product_card.html" %}{% endfor %}
   </div>
 {% endif %}
@@ -78,7 +92,6 @@
       const btn = this;
       const originalText = btn.textContent;
       
-      // Track add to cart event manually if needed (though tracker.js handles data-track-click)
       if (window.SmartReco) {
         window.SmartReco.track('add_to_cart', {
           product_id: btn.getAttribute('data-product-id'),
@@ -87,7 +100,8 @@
       }
       
       btn.innerHTML = 'Added to Cart ✓';
-      btn.style.background = '#10b981';
+      btn.style.background = '#4FE0C8';
+      btn.style.color = '#12172B';
       
       if (window.showToast) {
         window.showToast('Added to cart successfully!', 'success');
@@ -96,6 +110,7 @@
       setTimeout(() => {
         btn.innerHTML = originalText;
         btn.style.background = '';
+        btn.style.color = '';
       }, 2000);
     });
   }

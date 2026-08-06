@@ -61,33 +61,78 @@ the catalog for a minute and the dashboard fills itself.
 
 ## Architecture
 
-```
-Browser
-  │  tracker.js — queue → throttle/debounce → batch → sendBeacon/fetch
-  ▼
-POST /api/events/batch ──► bulk INSERT into events        (returns 202 immediately;
-                                                           no LLM work on this path)
-                              │
-                              ▼
-                    behaviour analyzer  (deterministic, no LLM)
-                    weighted, time-decayed interest profile
-                    + a stable "interest signature"
-                              │
-                              ▼
-                    ┌─── trigger policy ───┐
-                    │  changed enough?     │──no──► serve cached recommendation
-                    └──────────┬───────────┘
-                               yes
-                               ▼
-        ┌──────────────── LangGraph agent ────────────────┐
-        │  analyze ──► decide ──► retrieve ──► grade ──┐  │
-        │                 │           ▲          │     │  │
-        │                 │           └── refine ┘ (≤2)│  │
-        │                 └──────────────────────► generate
-        └──────────────────────────┬──────────────────────┘
-                                   ▼
-                    recommendations table  ──►  dashboard
-                                            └►  daily email digest (APScheduler)
+```mermaid
+graph TD
+    %% Styling
+    classDef client fill:#e0f2fe,stroke:#2563eb,stroke-width:2px,color:#1e3a8a
+    classDef api fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e
+    classDef core fill:#dcfce3,stroke:#16a34a,stroke-width:2px,color:#14532d
+    classDef ai fill:#f3e8ff,stroke:#9333ea,stroke-width:2px,color:#581c87
+    classDef db fill:#f1f5f9,stroke:#475569,stroke-width:2px,color:#1e293b
+    classDef external fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
+    
+    subgraph ClientLayer ["Client Layer (Frontend)"]
+        UI["Web Interface (HTML/JS/CSS)"]:::client
+        EventTracker["Event Telemetry Tracker"]:::client
+    end
+
+    subgraph APILayer ["API Layer (FastAPI)"]
+        Router["FastAPI Routers"]:::api
+        Auth["Auth & Sessions"]:::api
+        Admin["Admin Dashboard"]:::api
+    end
+
+    subgraph CoreServices ["Core Services Layer"]
+        RecoService["Recommendation Service"]:::core
+        ProductService["Product Catalog Service"]:::core
+        TriggerService["Behavioral Trigger Service"]:::core
+        Scheduler["Background Scheduler (APScheduler)"]:::core
+    end
+
+    subgraph AIEngine ["Agentic AI Engine (LangGraph)"]
+        AgentGraph["LangGraph State Machine"]:::ai
+        Context["Context Extractor"]:::ai
+        VectorSearch["Semantic Vector Search"]:::ai
+        Generator["Personalized Content Generator"]:::ai
+    end
+
+    subgraph DataLayer ["Data & Storage Layer"]
+        SQLDB[("SQL Database (SQLite)<br/>Users, Products, Events")]:::db
+        VectorDB[("Vector Database (ChromaDB)<br/>Product Embeddings")]:::db
+    end
+
+    subgraph External ["External Services"]
+        MeshAPI["Mesh API (LLM & Embeddings)"]:::external
+    end
+
+    %% Client to API
+    UI -- "User Interactions" --> Router
+    EventTracker -- "Async Telemetry Streams" --> Router
+    Router -- "Authentication" --> Auth
+    Router -- "Manage System" --> Admin
+
+    %% API to Services
+    Router -- "Fetch Recommendations" --> RecoService
+    Router -- "Browse Catalog" --> ProductService
+    Router -- "Process Events" --> TriggerService
+
+    %% Services to Data
+    ProductService -- "CRUD Operations" --> SQLDB
+    TriggerService -- "Store Behavior Trail" --> SQLDB
+    ProductService -- "Dual-Write Embeddings" --> VectorDB
+    TriggerService -- "Evaluate thresholds" --> RecoService
+    Scheduler -- "Run background checks" --> RecoService
+
+    %% AI Engine Interactions
+    RecoService -- "Invoke Agent Workflow" --> AgentGraph
+    AgentGraph -- "1. Analyze Trail" --> Context
+    AgentGraph -- "2. Retrieve Catalog" --> VectorSearch
+    AgentGraph -- "3. Synthesize Message" --> Generator
+    
+    Context -- "Fetch History" --> SQLDB
+    VectorSearch -- "Semantic Query" --> VectorDB
+    VectorSearch -- "Embedding Generation" --> MeshAPI
+    Generator -- "LLM Completions" --> MeshAPI
 ```
 
 ### The agent graph

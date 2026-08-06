@@ -97,6 +97,14 @@
     var batch = queue.splice(0, MAX_BATCH);
     var payload = JSON.stringify({ events: batch });
 
+    var signal = document.getElementById("global-tracker-signal");
+    if (signal && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      signal.classList.remove("pulse");
+      void signal.offsetWidth; // trigger reflow
+      signal.classList.add("pulse");
+      setTimeout(function() { signal.classList.remove("pulse"); }, 300);
+    }
+
     // Unload path: sendBeacon is fire-and-forget and survives page teardown.
     if (useBeacon && navigator.sendBeacon) {
       try {
