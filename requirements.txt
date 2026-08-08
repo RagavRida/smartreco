@@ -8,9 +8,10 @@ itsdangerous>=2.1.2
 # --- LLM client: every AI call goes through Mesh API (OpenAI-compatible) ---
 openai>=1.30.0
 
-# --- Persistence ---
+# --- Persistence & Auth ---
 SQLAlchemy>=2.0.25
 bcrypt>=4.1.2
+PyJWT>=2.8.0
 
 # --- Vector database ---
 chromadb>=0.4.24

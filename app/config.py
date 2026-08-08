@@ -54,6 +54,12 @@ class Settings:
     secret_key: str = _env("SECRET_KEY", "dev-secret-change-me")
     database_url: str = _env("DATABASE_URL", f"sqlite:///{DATA_DIR / 'smartreco.db'}")
 
+    # --- JWT Authentication ---
+    jwt_secret_key: str = _env("JWT_SECRET_KEY", "") or _env("SECRET_KEY", "dev-secret-change-me")
+    jwt_algorithm: str = _env("JWT_ALGORITHM", "HS256")
+    jwt_access_token_expire_minutes: int = _env_int("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", 30)
+    jwt_refresh_token_expire_days: int = _env_int("JWT_REFRESH_TOKEN_EXPIRE_DAYS", 7)
+
     # --- Mesh API (mandatory for all LLM calls) ---
     mesh_api_key: str = _env("MESH_API_KEY", "")
     mesh_base_url: str = _env("MESH_BASE_URL", "https://api.meshapi.ai/v1")

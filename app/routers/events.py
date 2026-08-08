@@ -22,7 +22,7 @@ from sqlalchemy.orm import Session
 
 from ..config import settings
 from ..database import get_db
-from ..deps import get_current_user
+from ..deps import get_current_user, get_current_user_jwt
 from ..models import Event, Product, User
 
 logger = logging.getLogger(__name__)
@@ -100,8 +100,10 @@ async def ingest_batch(
     request: Request,
     db: Session = Depends(get_db),
     user: Optional[User] = Depends(get_current_user),
+    jwt_user: Optional[User] = Depends(get_current_user_jwt),
 ):
     """Accepts a batch of events. Also handles navigator.sendBeacon payloads."""
+    effective_user = jwt_user or user
     try:
         payload = await request.json()
     except Exception:  # noqa: BLE001 - beacons can arrive as text/plain
@@ -122,7 +124,7 @@ async def ingest_batch(
     incoming = batch.events[: settings.events_max_batch]
     slug_map = _resolve_product_ids(db, incoming)
 
-    rows = [m for m in (_to_model(e, user, slug_map) for e in incoming) if m is not None]
+    rows = [m for m in (_to_model(e, effective_user, slug_map) for e in incoming) if m is not None]
     if rows:
         db.bulk_save_objects(rows)   # one round trip, no per-object ORM overhead
         db.commit()
@@ -135,17 +137,19 @@ def my_events(
     limit: int = 50,
     db: Session = Depends(get_db),
     user: Optional[User] = Depends(get_current_user),
+    jwt_user: Optional[User] = Depends(get_current_user_jwt),
 ):
     """Small introspection endpoint — handy for the demo and for debugging."""
-    if user is None:
+    effective_user = jwt_user or user
+    if effective_user is None:
         return JSONResponse({"events": [], "total": 0})
     total = db.execute(
-        select(func.count(Event.id)).where(Event.user_id == user.id)
+        select(func.count(Event.id)).where(Event.user_id == effective_user.id)
     ).scalar_one()
     rows = (
         db.execute(
             select(Event)
-            .where(Event.user_id == user.id)
+            .where(Event.user_id == effective_user.id)
             .order_by(Event.created_at.desc())
             .limit(min(limit, 200))
         )

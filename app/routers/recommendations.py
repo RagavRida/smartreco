@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..deps import require_api_user
+from ..deps import get_api_user
 from ..models import User
 from ..services import behavior, recommender, trigger
 from ..agent.graph import engine_name
@@ -43,20 +43,20 @@ def _serialize(result: recommender.RecommendationResult) -> dict:
 def current(
     refresh: bool = Query(False, description="Force the agent to run"),
     db: Session = Depends(get_db),
-    user: User = Depends(require_api_user),
+    user: User = Depends(get_api_user),
 ):
     result = recommender.get_recommendation(db, user, force=refresh)
     return _serialize(result)
 
 
 @router.post("/refresh")
-def refresh(db: Session = Depends(get_db), user: User = Depends(require_api_user)):
+def refresh(db: Session = Depends(get_db), user: User = Depends(get_api_user)):
     result = recommender.get_recommendation(db, user, force=True)
     return _serialize(result)
 
 
 @router.get("/profile")
-def profile(db: Session = Depends(get_db), user: User = Depends(require_api_user)):
+def profile(db: Session = Depends(get_db), user: User = Depends(get_api_user)):
     """The behavioural profile the agent reasons over — useful for the demo."""
     prof = behavior.build_profile(db, user.id)
     state = trigger.get_or_create_state(db, user.id)
@@ -74,7 +74,7 @@ def profile(db: Session = Depends(get_db), user: User = Depends(require_api_user
 
 
 @router.get("/history")
-def history(db: Session = Depends(get_db), user: User = Depends(require_api_user)):
+def history(db: Session = Depends(get_db), user: User = Depends(get_api_user)):
     rows = recommender.history(db, user.id)
     return {
         "history": [
