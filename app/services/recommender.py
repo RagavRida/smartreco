@@ -62,6 +62,9 @@ class RecommendationResult:
     ran_agent: bool
     decision: dict[str, Any]
     trace: list[dict[str, Any]]
+    ab_variant: Optional[str] = None
+    ab_variant_name: Optional[str] = None
+    ab_experiment_id: Optional[int] = None
 
     @property
     def served_from_cache(self) -> bool:
@@ -132,10 +135,26 @@ def get_recommendation(
         final.get("is_fallback"),
     )
 
+    # Track A/B experiment impression
+    try:
+        from . import ab_testing
+        ab_exp_id = final.get("ab_experiment_id")
+        ab_variant = final.get("ab_variant")
+        if ab_exp_id and ab_variant:
+            ab_testing.track_impression(
+                db, ab_exp_id, user.id, ab_variant, recommendation.id
+            )
+    except Exception:
+        pass  # best-effort
+
     # Push real-time update via WebSocket
     _broadcast_recommendation(user.id, recommendation)
 
-    return RecommendationResult(recommendation, True, decision.as_dict(), final.get("trace", []))
+    result = RecommendationResult(recommendation, True, decision.as_dict(), final.get("trace", []))
+    result.ab_variant = final.get("ab_variant")
+    result.ab_variant_name = final.get("ab_variant_name")
+    result.ab_experiment_id = final.get("ab_experiment_id")
+    return result
 
 
 def _persist(

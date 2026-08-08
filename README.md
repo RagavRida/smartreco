@@ -23,6 +23,9 @@ Every LLM/AI call goes through **Mesh API**.
 | ⭐ Scheduled proactive delivery (APScheduler + email) | `app/services/scheduler.py`, `app/services/mailer.py` |
 | ⭐ Observability (LangSmith tracing) | `app/services/tracing.py` |
 | ⭐ Retrieval polish (metadata filtering, re-ranking, fusion, diversity) | `app/services/retrieval.py` |
+| ⭐ JWT authentication + role-based authorization | `app/security.py`, `app/deps.py`, `app/routers/auth.py` |
+| ⭐ Real-time WebSocket recommendation feed | `app/services/ws_manager.py`, `app/routers/ws.py` |
+| ⭐ A/B testing framework (self-improving recommendations) | `app/services/ab_testing.py`, `app/routers/ab.py` |
 
 ---
 
@@ -97,6 +100,7 @@ graph TD
         TriggerService["Behavioral Trigger Service"]:::core
         Scheduler["Background Scheduler (APScheduler)"]:::core
         WSManager["WebSocket Connection Manager"]:::realtime
+        ABEngine["A/B Testing Engine"]:::core
     end
 
     subgraph AIEngine ["Agentic AI Engine (LangGraph)"]
@@ -156,6 +160,11 @@ graph TD
     %% Real-time push flow
     RecoService -. "Broadcast on agent run" .-> WSManager
     WSManager -. "Push to user" .-> WSEndpoint
+
+    %% A/B Testing flow
+    ABEngine -- "Assign Variant" --> Generator
+    ABEngine -- "Track Impressions/Clicks" --> SQLDB
+    Router -- "A/B Analytics" --> ABEngine
 ```
 
 ### The agent graph
@@ -278,6 +287,27 @@ exposed at `GET /api/recommendations?refresh=true` and summarised on the dashboa
 - Category diversification that loosens automatically when one interest clearly dominates.
 - Deterministic retrieval grading to decide whether to refine.
 
+**⭐ JWT authentication** — `app/security.py`, `app/deps.py`. Dual-auth architecture:
+httpOnly session cookies for browser pages, JWT Bearer tokens for programmatic API access.
+Role-based guards (`require_role("admin")`) protect admin endpoints. Token endpoints at
+`POST /api/auth/token` and `POST /api/auth/refresh`.
+
+**⭐ Real-time WebSocket feed** — `app/services/ws_manager.py`, `app/routers/ws.py`.
+Persistent WebSocket at `/ws/recommendations` pushes new recommendations to the dashboard
+instantly when the agent finishes. Auto-reconnect with exponential backoff, live status
+indicator (green dot = connected), and card flash animations on update.
+
+**⭐ A/B testing framework** — `app/services/ab_testing.py`, `app/routers/ab.py`.
+Self-improving recommendations via A/B experimentation:
+- Two recommendation styles: **persuasive** (action-oriented, motivating) vs
+  **informational** (analytical, evidence-based). Each style overrides the agent's system
+  prompt in the generate node.
+- Users are deterministically assigned to a variant (hash-based, no randomness).
+- Every impression and click is tracked per variant.
+- Statistical significance computed via z-score proportion test.
+- Results dashboard at `GET /api/ab/results` with CTR, lift %, confidence level, and
+  auto-generated recommendations on which style to promote.
+
 ---
 
 ## API
@@ -291,6 +321,13 @@ exposed at `GET /api/recommendations?refresh=true` and summarised on the dashboa
 | `GET` | `/api/recommendations/profile` | The behavioural profile + live trigger decision |
 | `GET` | `/api/recommendations/history` | Previous recommendations |
 | `GET` | `/api/health` | Vector backend, agent engine, scheduler, tracing status |
+| `POST` | `/api/auth/token` | JWT login — returns access + refresh tokens |
+| `POST` | `/api/auth/refresh` | Exchange refresh token for new access token |
+| `GET` | `/api/auth/me` | Current user profile (JWT or cookie) |
+| `POST` | `/api/ab/click` | Track A/B experiment click |
+| `GET` | `/api/ab/results` | A/B experiment analytics (CTR, confidence, winner) |
+| `GET` | `/api/ab/my-variant` | Current user's A/B variant assignment |
+| `WS` | `/ws/recommendations` | Real-time recommendation push (WebSocket) |
 
 Pages: `/`, `/catalog`, `/product/{slug}`, `/dashboard`, `/login`, `/register`,
 `/admin/products`, `/admin/system`.

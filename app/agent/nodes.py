@@ -247,9 +247,30 @@ def make_generate_node(db: Session) -> NodeFn:
         by_id = {c["id"]: c for c in candidates}
 
         try:
+            # --- A/B experiment: override system prompt per variant ---
+            system_prompt = prompts.GENERATE_SYSTEM
+            try:
+                from ..services import ab_testing
+                experiment = ab_testing.get_active_experiment(db)
+                if experiment:
+                    variant = ab_testing.assign_variant(
+                        int(state.get("user_id", 0)), experiment.id
+                    )
+                    style_override = ab_testing.get_variant_prompt(experiment, variant)
+                    if style_override:
+                        # Prepend style direction, keep the hard rules from original
+                        system_prompt = style_override + "\n\n" + prompts.GENERATE_SYSTEM.split("Hard rules:")[1] if "Hard rules:" in prompts.GENERATE_SYSTEM else style_override + "\n\n" + prompts.GENERATE_SYSTEM
+                    state["ab_variant"] = variant
+                    state["ab_experiment_id"] = experiment.id
+                    state["ab_variant_name"] = ab_testing.get_variant_name(experiment, variant)
+                    note(state, "generate", ab_experiment=experiment.name, variant=variant,
+                         variant_name=state["ab_variant_name"])
+            except Exception:
+                pass  # A/B is best-effort; never block generation
+
             result = chat_json(
                 [
-                    {"role": "system", "content": prompts.GENERATE_SYSTEM},
+                    {"role": "system", "content": system_prompt},
                     {
                         "role": "user",
                         "content": prompts.generate_user_prompt(

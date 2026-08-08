@@ -12,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from .config import BASE_DIR, settings
 from .database import init_db
 from .deps import RedirectToLogin, redirect, render
-from .routers import admin, auth, catalog, events, recommendations, ws
+from .routers import ab, admin, auth, catalog, events, recommendations, ws
 from .services import scheduler, tracing, vector_store
 from .agent.graph import engine_name
 
@@ -38,6 +38,16 @@ async def lifespan(app: FastAPI):
             "Add your rsk_... key to .env to enable the agent."
         )
     scheduler.start()
+
+    # Seed default A/B experiment
+    try:
+        from .database import SessionLocal
+        from .services import ab_testing
+        with SessionLocal() as db:
+            exp = ab_testing.ensure_default_experiment(db)
+            logger.info("A/B experiment active: %s (id=%s)", exp.name, exp.id)
+    except Exception as exc:
+        logger.warning("A/B experiment setup skipped: %s", exc)
     try:
         yield
     finally:
@@ -54,6 +64,7 @@ app.include_router(admin.router)
 app.include_router(events.router)
 app.include_router(recommendations.router)
 app.include_router(ws.router)
+app.include_router(ab.router)
 
 
 @app.exception_handler(RedirectToLogin)
@@ -80,4 +91,5 @@ def health():
         "scheduler": scheduler.status(),
         "tracing": tracing.is_enabled(),
         "websocket_connections": ws_mgr.connection_count(),
+        "ab_experiment_active": True,
     }

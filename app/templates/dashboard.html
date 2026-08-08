@@ -14,6 +14,14 @@
     </span>
     <span>·</span>
     <button id="refresh-reco">Re-analyze now</button>
+    {% if ab_info and ab_info.variant %}
+      <span class="ab-badge ab-variant-{{ ab_info.variant|lower }}"
+            data-ab-experiment="{{ ab_info.experiment_id }}"
+            data-ab-variant="{{ ab_info.variant }}"
+            data-ab-reco-id="{{ recommendation.id if recommendation else '' }}">
+        ⚗️ {{ ab_info.variant_name|title }} style
+      </span>
+    {% endif %}
   </div>
 </div>
 
@@ -268,5 +276,54 @@
         btn.innerHTML = 'Re-analyze now';
       });
   });
+
+  // ---------------------------------------------------------------------------
+  // A/B Testing — track clicks on recommended courses
+  // ---------------------------------------------------------------------------
+  (function() {
+    var badge = document.querySelector('.ab-badge');
+    if (!badge) return;
+
+    var experimentId = badge.getAttribute('data-ab-experiment');
+    var variant = badge.getAttribute('data-ab-variant');
+    var recoId = badge.getAttribute('data-ab-reco-id');
+
+    if (!experimentId || !variant) return;
+
+    // Intercept clicks on recommendation items
+    document.querySelectorAll('[data-track-click="reco-item"]').forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        var productId = this.getAttribute('data-product-id');
+        if (!productId) return;
+
+        // Fire click tracking (non-blocking)
+        navigator.sendBeacon('/api/ab/click', JSON.stringify({
+          experiment_id: parseInt(experimentId),
+          variant: variant,
+          product_id: parseInt(productId),
+          recommendation_id: recoId ? parseInt(recoId) : null,
+        }));
+      });
+    });
+
+    // Also track clicks on "View Course" CTAs
+    document.querySelectorAll('.reco-card .cta').forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        var card = this.closest('.reco-item');
+        if (!card) return;
+        var trackLink = card.querySelector('[data-track-click="reco-item"]');
+        if (!trackLink) return;
+        var productId = trackLink.getAttribute('data-product-id');
+        if (!productId) return;
+
+        navigator.sendBeacon('/api/ab/click', JSON.stringify({
+          experiment_id: parseInt(experimentId),
+          variant: variant,
+          product_id: parseInt(productId),
+          recommendation_id: recoId ? parseInt(recoId) : null,
+        }));
+      });
+    });
+  })();
 </script>
 {% endblock %}

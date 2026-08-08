@@ -237,3 +237,53 @@ class AgentState(Base):
     last_digest_sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
     user: Mapped["User"] = relationship(back_populates="agent_state")
+
+
+class ABExperiment(Base):
+    """An A/B experiment comparing two recommendation styles."""
+
+    __tablename__ = "ab_experiments"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
+    description: Mapped[str] = mapped_column(Text, default="")
+    variant_a_name: Mapped[str] = mapped_column(String(60), default="persuasive")
+    variant_b_name: Mapped[str] = mapped_column(String(60), default="informational")
+    variant_a_prompt: Mapped[str] = mapped_column(Text, default="")
+    variant_b_prompt: Mapped[str] = mapped_column(Text, default="")
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+    traffic_pct: Mapped[int] = mapped_column(Integer, default=100)  # % of users enrolled
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+    events: Mapped[list["ABEvent"]] = relationship(
+        back_populates="experiment", cascade="all, delete-orphan"
+    )
+
+
+class ABEvent(Base):
+    """A tracked interaction within an A/B experiment (impression, click, conversion)."""
+
+    __tablename__ = "ab_events"
+    __table_args__ = (
+        Index("ix_ab_events_experiment", "experiment_id", "event_type"),
+        Index("ix_ab_events_user_variant", "user_id", "variant"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    experiment_id: Mapped[int] = mapped_column(
+        ForeignKey("ab_experiments.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    recommendation_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("recommendations.id", ondelete="SET NULL"), nullable=True
+    )
+    variant: Mapped[str] = mapped_column(String(10), nullable=False)  # "A" or "B"
+    event_type: Mapped[str] = mapped_column(String(40), nullable=False)  # impression | click | conversion
+    product_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    meta_json: Mapped[str] = mapped_column(Text, default="{}")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, index=True)
+
+    experiment: Mapped["ABExperiment"] = relationship(back_populates="events")
+

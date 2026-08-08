@@ -120,6 +120,22 @@ def dashboard(
     state = trigger.get_or_create_state(db, user.id)
     recent = behavior.recent_events(db, user.id, limit=12)
 
+    # A/B experiment info
+    ab_info = {}
+    try:
+        from ..services import ab_testing
+        experiment = ab_testing.get_active_experiment(db)
+        if experiment:
+            variant = ab_testing.assign_variant(user.id, experiment.id)
+            ab_info = {
+                "experiment_id": experiment.id,
+                "variant": variant,
+                "variant_name": ab_testing.get_variant_name(experiment, variant),
+                "experiment_name": experiment.name,
+            }
+    except Exception:
+        pass
+
     return render(
         request,
         "dashboard.html",
@@ -130,5 +146,7 @@ def dashboard(
             "ran_agent": result.ran_agent,
             "agent_state": state,
             "recent_events": recent,
+            "ab_info": ab_info,
         },
     )
+
