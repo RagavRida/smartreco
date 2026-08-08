@@ -85,10 +85,166 @@
 
 {% block scripts %}
 <script>
+  // ---------------------------------------------------------------------------
+  // Real-time WebSocket recommendation feed
+  // ---------------------------------------------------------------------------
+  (function() {
+    var ws = null;
+    var reconnectAttempts = 0;
+    var maxReconnect = 5;
+    var statusDot = null;
+
+    function createStatusIndicator() {
+      var bar = document.querySelector('.meta-bar');
+      if (!bar) return;
+      var indicator = document.createElement('span');
+      indicator.id = 'ws-status';
+      indicator.className = 'ws-indicator';
+      indicator.title = 'Real-time feed connecting...';
+      indicator.innerHTML = '<span class="ws-dot connecting"></span> <span class="ws-label">Connecting</span>';
+      bar.appendChild(indicator);
+      statusDot = indicator;
+    }
+
+    function setStatus(state, label) {
+      if (!statusDot) return;
+      var dot = statusDot.querySelector('.ws-dot');
+      var lbl = statusDot.querySelector('.ws-label');
+      dot.className = 'ws-dot ' + state;
+      lbl.textContent = label;
+      statusDot.title = 'Real-time feed: ' + label;
+    }
+
+    function connectWS() {
+      var protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(protocol + '//' + location.host + '/ws/recommendations');
+
+      ws.onopen = function() {
+        reconnectAttempts = 0;
+        setStatus('connected', 'Live');
+        console.log('[SmartReco] WebSocket connected');
+      };
+
+      ws.onmessage = function(e) {
+        try {
+          var data = JSON.parse(e.data);
+          if (data.type === 'recommendation_updated') {
+            handleRecommendationUpdate(data.recommendation);
+          } else if (data.type === 'heartbeat') {
+            ws.send('ping');
+          }
+        } catch (err) {
+          console.warn('[SmartReco] WS message parse error:', err);
+        }
+      };
+
+      ws.onclose = function(e) {
+        setStatus('disconnected', 'Offline');
+        if (e.code !== 4001 && reconnectAttempts < maxReconnect) {
+          reconnectAttempts++;
+          var delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
+          console.log('[SmartReco] WS reconnecting in', delay, 'ms');
+          setTimeout(connectWS, delay);
+        }
+      };
+
+      ws.onerror = function() {
+        setStatus('disconnected', 'Error');
+      };
+
+      // Keep alive every 4 minutes
+      setInterval(function() {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send('ping');
+        }
+      }, 240000);
+    }
+
+    function handleRecommendationUpdate(reco) {
+      if (!reco || !reco.items || reco.items.length === 0) return;
+
+      // Show a live toast notification
+      if (window.showToast) {
+        window.showToast('New recommendation ready!', 'success');
+      }
+
+      // Flash the status indicator
+      setStatus('updated', 'Updated!');
+      setTimeout(function() { setStatus('connected', 'Live'); }, 3000);
+
+      // Dynamically update the recommendation cards
+      var container = document.querySelector('.reco-items');
+      if (!container) {
+        // Currently showing "no recommendation" state — reload to get the full template
+        setTimeout(function() { window.location.reload(); }, 1200);
+        return;
+      }
+
+      // Update the narrative
+      var narrativeEl = container.querySelector('.display');
+      if (narrativeEl && reco.narrative) {
+        narrativeEl.textContent = reco.narrative;
+        narrativeEl.classList.add('ws-flash');
+        setTimeout(function() { narrativeEl.classList.remove('ws-flash'); }, 2000);
+      }
+
+      // Update each item card
+      var cards = container.querySelectorAll('.reco-item');
+      reco.items.forEach(function(item, i) {
+        if (i >= cards.length) return;
+        var card = cards[i];
+        var recoCard = card.querySelector('.reco-card');
+        if (!recoCard) return;
+
+        var title = recoCard.querySelector('h4 a');
+        if (title) {
+          title.textContent = item.title;
+          title.href = '/product/' + item.slug;
+          title.setAttribute('data-slug', item.slug);
+          title.setAttribute('data-product-id', item.id);
+          if (item.category) title.setAttribute('data-category', item.category);
+        }
+
+        var persuasion = recoCard.querySelector('.persuasion');
+        if (persuasion) {
+          persuasion.textContent = item.description || 'An excellent course tailored to your latest learning habits.';
+        }
+
+        var hook = recoCard.querySelector('.eyebrow');
+        if (hook && item.hook) {
+          hook.textContent = item.hook;
+        }
+
+        var foot = recoCard.querySelector('.foot span');
+        if (foot) {
+          foot.textContent = (item.level ? item.level.charAt(0).toUpperCase() + item.level.slice(1) : '') +
+            ' · ' + Math.round(item.duration_hours || 0) + 'h · $' + Math.round(item.price || 0);
+        }
+
+        var viewLink = recoCard.querySelector('.foot .cta');
+        if (viewLink) viewLink.href = '/product/' + item.slug;
+
+        // Animate the update
+        card.classList.add('ws-flash');
+        setTimeout(function() { card.classList.remove('ws-flash'); }, 2000);
+      });
+
+      // Update the header
+      var header = document.querySelector('.reco-header .meta-bar span:first-child');
+      if (header) header.textContent = 'Agent ran just now';
+    }
+
+    createStatusIndicator();
+    connectWS();
+  })();
+
+  // ---------------------------------------------------------------------------
+  // Manual refresh button (existing)
+  // ---------------------------------------------------------------------------
   document.getElementById("refresh-reco").addEventListener("click", function () {
     var btn = this;
     btn.disabled = true;
-    btn.innerHTML = '<span class="loading-spinner"></span> <span style="margin-left: 8px;">Agent is thinking…</span>';
+    btn.innerHTML = '<span class="loading-spinner"></span> <span class="ws-ml-8">Agent is thinking…</span>';
     if (window.SmartReco) window.SmartReco.flush();
     fetch("/api/recommendations/refresh", { method: "POST", credentials: "same-origin" })
       .then(function (r) { 
@@ -96,8 +252,15 @@
         return r.json(); 
       })
       .then(function () { 
-        if(window.showToast) window.showToast("Recommendation refreshed!", "success");
-        setTimeout(() => window.location.reload(), 800); 
+        // The WebSocket will handle the live update, but reload as fallback
+        setTimeout(function() {
+          btn.disabled = false;
+          btn.innerHTML = 'Re-analyze now';
+          // Only reload if WS didn't already update the page
+          if (!document.querySelector('.ws-flash')) {
+            window.location.reload();
+          }
+        }, 2000);
       })
       .catch(function (e) {
         if(window.showToast) window.showToast("Failed to refresh.", "error");

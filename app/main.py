@@ -12,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from .config import BASE_DIR, settings
 from .database import init_db
 from .deps import RedirectToLogin, redirect, render
-from .routers import admin, auth, catalog, events, recommendations
+from .routers import admin, auth, catalog, events, recommendations, ws
 from .services import scheduler, tracing, vector_store
 from .agent.graph import engine_name
 
@@ -53,6 +53,7 @@ app.include_router(catalog.router)
 app.include_router(admin.router)
 app.include_router(events.router)
 app.include_router(recommendations.router)
+app.include_router(ws.router)
 
 
 @app.exception_handler(RedirectToLogin)
@@ -69,6 +70,7 @@ async def _not_found(request: Request, exc: HTTPException):
 
 @app.get("/api/health", tags=["system"])
 def health():
+    from .services.ws_manager import manager as ws_mgr
     return {
         "status": "ok",
         "mesh_configured": settings.mesh_configured,
@@ -77,4 +79,5 @@ def health():
         "agent_engine": engine_name(),
         "scheduler": scheduler.status(),
         "tracing": tracing.is_enabled(),
+        "websocket_connections": ws_mgr.connection_count(),
     }

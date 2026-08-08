@@ -26,6 +26,36 @@ from . import behavior, tracing, trigger
 logger = logging.getLogger(__name__)
 
 
+def _broadcast_recommendation(user_id: int, recommendation: "Recommendation") -> None:
+    """Fire-and-forget push of a new recommendation to the user's WebSocket connections."""
+    import asyncio
+    try:
+        from .ws_manager import manager
+        payload = {
+            "type": "recommendation_updated",
+            "recommendation": {
+                "id": recommendation.id,
+                "headline": recommendation.headline,
+                "narrative": recommendation.narrative,
+                "items": recommendation.items,
+                "trigger_reason": recommendation.trigger_reason,
+                "model_used": recommendation.model_used,
+                "latency_ms": recommendation.latency_ms,
+                "is_fallback": recommendation.is_fallback,
+                "created_at": recommendation.created_at.isoformat() if recommendation.created_at else None,
+            },
+        }
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(manager.send_to_user(user_id, payload))
+        except RuntimeError:
+            # No running event loop (e.g. during sync tests) — skip silently
+            pass
+    except Exception:
+        # WebSocket broadcast is best-effort; never block the main flow
+        pass
+
+
 @dataclass
 class RecommendationResult:
     recommendation: Optional[Recommendation]
@@ -101,6 +131,10 @@ def get_recommendation(
         latency_ms,
         final.get("is_fallback"),
     )
+
+    # Push real-time update via WebSocket
+    _broadcast_recommendation(user.id, recommendation)
+
     return RecommendationResult(recommendation, True, decision.as_dict(), final.get("trace", []))
 
 
