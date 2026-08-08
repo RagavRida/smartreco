@@ -70,16 +70,25 @@ graph TD
     classDef ai fill:#f3e8ff,stroke:#9333ea,stroke-width:2px,color:#581c87
     classDef db fill:#f1f5f9,stroke:#475569,stroke-width:2px,color:#1e293b
     classDef external fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
+    classDef realtime fill:#fdf2f8,stroke:#ec4899,stroke-width:2px,color:#831843
+    classDef auth fill:#fff7ed,stroke:#ea580c,stroke-width:2px,color:#7c2d12
     
     subgraph ClientLayer ["Client Layer (Frontend)"]
         UI["Web Interface (HTML/JS/CSS)"]:::client
         EventTracker["Event Telemetry Tracker"]:::client
+        WSClient["WebSocket Client"]:::realtime
     end
 
     subgraph APILayer ["API Layer (FastAPI)"]
         Router["FastAPI Routers"]:::api
-        Auth["Auth & Sessions"]:::api
         Admin["Admin Dashboard"]:::api
+        WSEndpoint["WebSocket Endpoint"]:::realtime
+    end
+
+    subgraph AuthLayer ["Authentication & Authorization"]
+        JWTAuth["JWT Token Service"]:::auth
+        CookieAuth["Session Cookies (Browser)"]:::auth
+        RoleGuard["Role-Based Guards (user/admin)"]:::auth
     end
 
     subgraph CoreServices ["Core Services Layer"]
@@ -87,6 +96,7 @@ graph TD
         ProductService["Product Catalog Service"]:::core
         TriggerService["Behavioral Trigger Service"]:::core
         Scheduler["Background Scheduler (APScheduler)"]:::core
+        WSManager["WebSocket Connection Manager"]:::realtime
     end
 
     subgraph AIEngine ["Agentic AI Engine (LangGraph)"]
@@ -108,13 +118,22 @@ graph TD
     %% Client to API
     UI -- "User Interactions" --> Router
     EventTracker -- "Async Telemetry Streams" --> Router
-    Router -- "Authentication" --> Auth
-    Router -- "Manage System" --> Admin
+    WSClient <-- "Real-Time Push" --> WSEndpoint
+
+    %% Auth flows
+    Router -- "Verify Identity" --> JWTAuth
+    Router -- "Browser Sessions" --> CookieAuth
+    JWTAuth -- "Check Permissions" --> RoleGuard
+    CookieAuth -- "Check Permissions" --> RoleGuard
+    WSEndpoint -- "Authenticate" --> CookieAuth
+    WSEndpoint -- "Authenticate" --> JWTAuth
 
     %% API to Services
+    Router -- "Manage System" --> Admin
     Router -- "Fetch Recommendations" --> RecoService
     Router -- "Browse Catalog" --> ProductService
     Router -- "Process Events" --> TriggerService
+    WSEndpoint -- "Register Connection" --> WSManager
 
     %% Services to Data
     ProductService -- "CRUD Operations" --> SQLDB
@@ -133,6 +152,10 @@ graph TD
     VectorSearch -- "Semantic Query" --> VectorDB
     VectorSearch -- "Embedding Generation" --> MeshAPI
     Generator -- "LLM Completions" --> MeshAPI
+
+    %% Real-time push flow
+    RecoService -. "Broadcast on agent run" .-> WSManager
+    WSManager -. "Push to user" .-> WSEndpoint
 ```
 
 ### The agent graph
