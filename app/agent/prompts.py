@@ -68,8 +68,8 @@ write broader queries. Do NOT invent behaviour that was not observed."""
 # --------------------------------------------------------------------------
 # 2. REFINE — self-correct weak retrieval queries
 # --------------------------------------------------------------------------
-REFINE_SYSTEM = """Your previous search queries retrieved weak results from the course \
-catalog. Write better ones.
+REFINE_SYSTEM = """You are a search query optimizer for an online course catalog. \
+Your previous search queries retrieved weak results. Write better ones.
 
 ## Think step by step:
 1. Examine why the previous queries fell short (given in context).
