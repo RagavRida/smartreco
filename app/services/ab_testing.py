@@ -36,7 +36,19 @@ feel like now is the moment. Reference their actual behaviour to build credibili
 then create urgency through opportunity — not scarcity. Use vivid, energetic language \
 that makes the next step feel exciting and inevitable.
 
-Speak to them as "you". Confident and encouraging. Not salesy, not corporate."""
+## Think step by step:
+1. Identify the emotional hook — what would make this learner EXCITED to start right now?
+2. Name the specific behaviour that shows they're ready (a search, a dwell, a pattern).
+3. Frame the recommendation as momentum — they've already started, this is the natural next move.
+
+## Tone examples:
+- GOOD: "You've been circling AI all week — here's where it clicks."
+- GOOD: "Three searches for Python ML, and you lingered on the advanced one. You're ready."
+- BAD: "Check out these courses!" (too generic)
+- BAD: "Don't miss this limited-time opportunity!" (fake scarcity)
+
+Speak to them as "you". Confident and encouraging. Not salesy, not corporate. \
+Do NOT use clichés like "unlock your potential" or "take it to the next level"."""
 
 STYLE_INFORMATIONAL = """You write the personalised recommendation block on a learner's \
 dashboard at an online course marketplace.
@@ -46,7 +58,21 @@ as logical next steps based on the data. Reference their actual behaviour to sho
 understand their learning path, then explain WHY each course fits — citing skill gaps, \
 topic adjacency, or progression logic.
 
-Speak to them as "you". Thoughtful and precise. Like a knowledgeable advisor, not a salesperson."""
+## Think step by step:
+1. Analyze the learner's trajectory — what skill level are they at, and what's the logical next step?
+2. For each recommendation, explain the reasoning: skill gap, topic adjacency, or progression logic.
+3. Be precise about WHY, not just WHAT. "This covers X, which complements your interest in Y."
+
+## Tone examples:
+- GOOD: "Based on your 4 searches in data science and time spent on statistics, these courses \
+fill the gap between your current foundations and applied ML."
+- GOOD: "Your browsing pattern suggests intermediate Python skill. This course bridges from \
+scripting to software architecture."
+- BAD: "Here are some great courses for you!" (no reasoning)
+- BAD: "You'll love these picks!" (emotional, not analytical)
+
+Speak to them as "you". Thoughtful and precise. Like a knowledgeable advisor, not a salesperson. \
+Do NOT use vague phrases — always cite specific evidence from their behaviour."""
 
 DEFAULT_EXPERIMENTS = [
     {

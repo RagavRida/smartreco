@@ -1,0 +1,59 @@
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionDeleteEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionDeleteEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionGetEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+LangGraph execution failed ('grade' is already being used as a state key) — retrying sequentially
+analyze node fell back to heuristics: MESH_API_KEY is not set — add it to your .env
+generate node fell back to template copy: Mesh client previously failed to initialise
+LangGraph execution failed ('grade' is already being used as a state key) — retrying sequentially
+
+SmartReco smoke test
+  scratch dir: /var/folders/hw/v2w304g504v1nqsjtng2f2qm0000gn/T/smartreco-test-ti49pbr3
+
+[1] Auth
+  PASS  bcrypt verifies the right password
+  PASS  bcrypt rejects the wrong password
+  PASS  signed session round-trips
+  PASS  tampered session is rejected
+
+[2] Dual-write to SQL + vector store
+  PASS  all products created
+  PASS  vector store mirrors SQL
+  PASS  unpublishing removes the vector document
+  PASS  republishing restores it
+  PASS  delete removes from both stores
+  PASS  reconcile reports no drift
+
+[3] Semantic retrieval
+  PASS  vector search returns results
+  PASS  most relevant course ranks first
+
+[4] Event ingestion + behaviour profile
+  PASS  events recorded
+  PASS  dominant category inferred
+  PASS  searches captured
+  PASS  dwell aggregated
+  PASS  signature is stable
+
+[5] Trigger policy
+  PASS  cold start runs the agent
+
+[6] Agent run (LangGraph)
+  engine: langgraph
+  PASS  agent produced a recommendation
+  PASS  recommendation has items
+  PASS  narrative written
+  PASS  graph executed all core nodes
+  PASS  every recommended id exists in the catalog
+  PASS  second request served from cache
+
+[7] Grounding guarantee (hallucinated ids are dropped)
+  PASS  fabricated product id was dropped
+  PASS  real product id was kept
+  PASS  LLM copy used (not the template)
+
+27 passed, 0 failed

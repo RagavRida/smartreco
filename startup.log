@@ -1,0 +1,27 @@
+INFO:     Will watch for changes in these directories: ['/Users/raghavendramachikatla/Downloads/smartreco']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [14245] using WatchFiles
+INFO:     Started server process [14247]
+INFO:     Waiting for application startup.
+2026-08-08 15:00:14,116 INFO    app.services.tracing :: LangSmith tracing disabled (set LANGCHAIN_TRACING_V2=true + LANGCHAIN_API_KEY)
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+2026-08-08 15:00:14,417 ERROR   chromadb.telemetry.product.posthog :: Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2026-08-08 15:00:14,417 ERROR   chromadb.telemetry.product.posthog :: Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2026-08-08 15:00:14,418 INFO    app.services.vector_store :: Vector store: chromadb at data/chroma
+2026-08-08 15:00:14,528 INFO    smartreco :: SmartReco up — vector_backend=chromadb agent_engine=langgraph mesh_configured=True
+2026-08-08 15:00:14,564 INFO    apscheduler.scheduler :: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-08-08 15:00:14,564 INFO    apscheduler.scheduler :: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-08-08 15:00:14,564 INFO    apscheduler.scheduler :: Added job "run_daily_digest" to job store "default"
+2026-08-08 15:00:14,564 INFO    apscheduler.scheduler :: Added job "run_vector_reconcile" to job store "default"
+2026-08-08 15:00:14,564 INFO    apscheduler.scheduler :: Scheduler started
+2026-08-08 15:00:14,564 INFO    app.services.scheduler :: Scheduler started — daily digest at 16:00 UTC
+2026-08-08 15:00:14,571 INFO    app.services.ab_testing :: ab_test.created experiment=1 name=Persuasive vs Informational
+2026-08-08 15:00:14,571 INFO    smartreco :: A/B experiment active: Persuasive vs Informational (id=1)
+INFO:     Application startup complete.
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-08-08 15:00:23,874 INFO    apscheduler.scheduler :: Scheduler has been shut down
+INFO:     Application shutdown complete.
+INFO:     Finished server process [14247]
+INFO:     Stopping reloader process [14245]
